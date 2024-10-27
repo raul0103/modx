@@ -1,6 +1,6 @@
 <?php
 
-if (empty($parents)) return false;
+if (!isset($parents)) return false;
 
 $cache_name = md5(serialize($scriptProperties));
 $cache_options = [
@@ -66,7 +66,7 @@ if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
             $parents = implode(',', $resources_prev_ids);
         }
 
-        if (!empty($parents)) {
+        if (isset($parents)) {
             $where_parents = "sc.parent IN ($parents)";
         } else {
             $where_parents = "1";
