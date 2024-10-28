@@ -117,7 +117,7 @@ if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
      * Подмена ресурсов если передан $transfer_ids
      */
     if ($transfer_ids) {
-        $transfer_ids_values = array_values($transfer_ids);
+        $transfer_ids_values = array_unique(array_values($transfer_ids));
         $transfer_ids_keys =  array_keys($transfer_ids);
 
         /**
@@ -152,6 +152,30 @@ if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
             }
         }
     }
+
+    /**
+     * Сортировка
+     */
+    if (isset($sortby)) {
+        usort($results, function ($a, $b) use ($sortby) {
+            // Получаем позиции id в массиве сортировки
+            $posA = array_search($a['id'], $sortby);
+            $posB = array_search($b['id'], $sortby);
+
+            // Если id есть в массиве сортировки, сортируем по их позиции
+            if ($posA !== false && $posB !== false) {
+                return $posA - $posB;
+            }
+            // Если только один из id есть в массиве сортировки, он идет раньше
+            if ($posA !== false) return -1;
+            if ($posB !== false) return 1;
+
+            // Если ни один из id нет в массиве сортировки, оставляем их порядок
+            return 0;
+        });
+    }
+
+
 
     /**
      * Формируем древовидную структуру
