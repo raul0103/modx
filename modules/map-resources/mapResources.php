@@ -58,6 +58,7 @@ if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
     $fields = 'sc.' . implode(',sc.', $fields);
     $results = [];
     $resources_prev_ids = []; // Родители после каждой итерации, для получения следующей вложенности
+    $all_resource_ids = []; // Используется в коде ниже, для получения пропущеных ресурсов
     $tvs = [];
     for ($i = 0; $i <= $depth; $i++) {
         if ($i > 0 && empty($resources_prev_ids)) continue;
@@ -79,6 +80,7 @@ if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
         $resources_prev_ids = array_map(function ($item) {
             return $item['id'];
         }, $rows);
+        $all_resource_ids = array_merge($all_resource_ids, $resources_prev_ids);
 
         $results = array_merge($results, $rows);
 
@@ -109,6 +111,46 @@ if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
         }
 
         $tvs_by_resource[$tv['contentid']][$tv['name']] = $tv['value'];
+    }
+
+    /**
+     * Подмена ресурсов если передан $transfer_ids
+     */
+    if ($transfer_ids) {
+        $transfer_ids_values = array_values($transfer_ids);
+        $transfer_ids_keys =  array_keys($transfer_ids);
+
+        /**
+         * Проверяем есть ли пропущеные ресурсы
+         * Может быть такое что мы получили карту категорий, но в $transfer_ids были переданы товары, поэтому получаем их
+         */
+        $missed_resources = $difference = array_diff($transfer_ids_keys, $all_resource_ids);
+        if (!empty($missed_resources)) {
+            $sql = "SELECT $fields FROM {$table_prefix}site_content AS sc WHERE id IN (" . implode(',', $missed_resources) . ")";
+            $result = $modx->query($sql);
+            $rows = $result->fetchAll(PDO::FETCH_ASSOC);
+
+            $results = array_merge($results, $rows);
+        }
+
+        foreach ($results as $index => &$resource) {
+            // Если передан $transfer_only - то очищаем родителей переденные в $transfer_ids
+            if (
+                $transfer_only
+                && in_array($resource['parent'], $transfer_ids_values)
+                && !in_array($resource['id'], $transfer_ids_keys)
+                && $resource['parent'] !== 0
+            ) {
+                unset($results[$index]);
+            }
+
+            $transfer = $transfer_ids[$resource['id']];
+
+            if (isset($transfer)) {
+                $resource['parent'] = $transfer;
+                $resource['bestseller'] = true;
+            }
+        }
     }
 
     /**
