@@ -1,0 +1,21 @@
+.mf-products__pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+
+  li {
+    margin: 0 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  li.active {
+    background-color: #007bff;
+    color: white;
+    pointer-events: none;
+  }
+  li.hidden {
+    display: none;
+  }
+}
