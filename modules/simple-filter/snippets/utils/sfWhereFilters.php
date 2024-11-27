@@ -5,9 +5,8 @@
  */
 
 if (!function_exists('sfWhereFilters')) {
-    function sfWhereFilters($get_params, $filter_uniqueid, $table_name)
+    function sfWhereFilters($params, $filter_uniqueid, $table_name)
     {
-        $params = $get_params ?: $_GET;
 
         if (!isset($params[$filter_uniqueid])) return '';
 

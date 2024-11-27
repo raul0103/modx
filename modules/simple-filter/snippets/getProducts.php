@@ -60,12 +60,13 @@ $where_string = sfWhereToString(WHERE_PRODUCTS);
 
 // Опции товара. Получаем для вывода их на странице в карточке товара
 $product_opions = sfProductOptions($options, 'po');
-// Фильтр. Формируется если есть get параметры
-$where_filters = sfWhereFilters($get_params, FILTER_UNIQUEID, 'po');
 
 // >>> Получение товаров
 $params = $get_params ?: $_GET;
 if ($params[$filter_uniqueid]) {
+    // Фильтр. Формируется если есть get параметры
+    $where_filters = sfWhereFilters($params, $filter_uniqueid ?: FILTER_UNIQUEID, 'po');
+
     $data = json_decode(urldecode($params[$filter_uniqueid]), true);
     $page = $data['page'] ?: 1;
 } else {
