@@ -74,7 +74,9 @@ if ($params[$filter_uniqueid]) {
 $offset = ($page - 1) * LIMIT_PRODUCTS;
 
 $sql = "SELECT sc.id,sc.pagetitle,sc.uri,msp.*
-            $product_opions -- Какие опции получить по товарам для вывода
+            $product_opions, -- Какие опции получить по товарам для вывода
+            REPLACE(FORMAT(msp.price, 0), ',', ' ') AS price,
+            REPLACE(FORMAT(msp.old_price, 0), ',', ' ') AS old_price
         FROM
             {$tp}site_content AS sc
         LEFT JOIN 
