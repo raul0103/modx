@@ -15,25 +15,18 @@ if (!function_exists('sfWhereFilters')) {
 
         if (empty($data['filters'])) return '';
 
-        $conditions = [];
-
         // Обрабатываем параметры options
+        $conditions = [];
         foreach ($data['filters'] as $key => $values) {
-            if (!is_array($values)) {
-                $values = [$values]; // Приводим к массиву, если одно значение
-            }
-
-            $valueConditions = [];
-            foreach ($values as $value) {
-                $valueConditions[] = "($table_name.`key` = '$key' AND $table_name.`value` = '$value')";
-            }
+            $values_string = is_array($values) ? implode("','", $values) : $values;
+            $values_string =  "'$values_string'";
 
             // Объединяем значения через OR
-            $conditions[] = '(' . implode(' OR ', $valueConditions) . ')';
+            $conditions[] = "MAX(CASE WHEN po.`key` = '$key' THEN po.`value` END) IN ($values_string)";
         }
 
         // Объединяем все условия через AND
-        $sqlWhere = ' AND ' . implode(' AND ', $conditions);
+        $sqlWhere = ' HAVING ' . implode(' AND ', $conditions);
 
         return $sqlWhere;
     }

@@ -80,5 +80,6 @@ file_put_contents($file_path, json_encode($data, JSON_PRETTY_PRINT));
 
 // Вернуть результат проверки
 if ($is_spam) {
+    // $validator->addError($key, 'Вы уже оставляли заявку');
     return false; // Это спам
 }

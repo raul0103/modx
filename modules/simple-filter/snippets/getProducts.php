@@ -89,16 +89,17 @@ $sql = "SELECT sc.id,sc.pagetitle,sc.uri,msp.*
         WHERE
             $where_string
             AND sc.parent IN ($category_ids)
-            $where_filters -- Условие по фильтрам
         GROUP BY
             sc.id
+        $where_filters -- Условие по фильтрам
         LIMIT " . LIMIT_PRODUCTS . " OFFSET $offset;";
+// exit($sql);
 $result = $modx->query($sql);
 $products = $result->fetchAll(PDO::FETCH_ASSOC);
 // <<<
 
 // >>> Пагинация
-$sql = "SELECT COUNT(DISTINCT sc.id) AS total
+$sql = "SELECT sc.id
         FROM
             {$tp}site_content AS sc
         LEFT JOIN 
@@ -107,9 +108,11 @@ $sql = "SELECT COUNT(DISTINCT sc.id) AS total
         WHERE
             $where_string
         AND sc.parent IN ($category_ids)
+        GROUP BY 
+            sc.id
             $where_filters;";
 $total_result = $modx->query($sql);
-$total = $total_result->fetch(PDO::FETCH_ASSOC)['total'];
+$total = $total_result->rowCount();
 $total_pages = ceil($total / LIMIT_PRODUCTS);
 // <<<
 
