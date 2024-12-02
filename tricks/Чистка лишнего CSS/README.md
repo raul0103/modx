@@ -1,0 +1,3 @@
+- npm install purgecss --save-dev
+- Указать пути в файле purgecss.js
+- node purgecss.js
