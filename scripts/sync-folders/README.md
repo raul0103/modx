@@ -13,6 +13,8 @@ sudo apt-get install sshpass
 ```bash
 touch sync_folders.sh
 nano sync_folders.sh  # Или используйте любой другой редактор
+chmod +x sync_folders.sh
+
 ```
 
 ## Шаг 3: Очистка файла от лишних символов
