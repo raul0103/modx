@@ -9,11 +9,13 @@
 if ($modx->context->key == 'mgr') return;
 
 $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
+$context_key = $modx->context->key;
 
 $json_data_path = [
-    "current" => MODX_BASE_PATH . 'core/elements/modules/virtual/json/' . $subdomain . '.json',
-    "default" => MODX_BASE_PATH . 'core/elements/modules/virtual/json/_default.json'
+    "current" => MODX_BASE_PATH . "core/elements/modules/virtual/json/$context_key/$subdomain.json",
+    "default" => MODX_BASE_PATH . "core/elements/modules/virtual/json/$context_key/_default.json"
 ];
+$changes_path = MODX_BASE_PATH . "core/elements/modules/virtual/changes/$context_key.php";
 
 $json_data = [];
 foreach ($json_data_path as $key => $path) {
@@ -33,17 +35,14 @@ if (!empty($json_data["current"])) {
     $json_data = $json_data['default'];
 }
 
+if (empty($json_data)) {
+    return;
+}
+
 $modx->setPlaceholder('virtual', $json_data);
 
 // Подмена топонимов
-$changes = [
-    "город Москва, Алтуфьевское ш, д. 79а" => "город Москва, Алтуфьевское ш, д. 79а", // То что не надо трогать. ЮР адрес на странице реквизиты
-    "Москва" => $json_data["topo1"],
-    "в Москве" => $json_data["topo2"],
-    "по Москве" => $json_data["topo3"],
-    "Москвы" => $json_data["topo4"],
-];
-
+$changes = include $changes_path;
 
 if (isset($modx->resource->_output)) {
     $output = &$modx->resource->_output;
