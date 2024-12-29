@@ -8,14 +8,17 @@
 
 if ($modx->context->key == 'mgr') return;
 
-$subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
-$context_key = $modx->context->key;
+// $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
+// $context_key = $modx->context->key;
+
+$config = include MODX_BASE_PATH . "core/elements/modules/virtual/config.php";
 
 $json_data_path = [
-    "current" => MODX_BASE_PATH . "core/elements/modules/virtual/json/$context_key/$subdomain.json",
-    "default" => MODX_BASE_PATH . "core/elements/modules/virtual/json/$context_key/_default.json"
+    "current" => MODX_BASE_PATH . "core/elements/modules/virtual/json/{$config['context_key']}/{$config['subdomain']}.json",
+    "default" => MODX_BASE_PATH . "core/elements/modules/virtual/json/{$config['context_key']}/_default.json"
 ];
-$changes_path = MODX_BASE_PATH . "core/elements/modules/virtual/changes/$context_key.php";
+$changes_path = MODX_BASE_PATH . "core/elements/modules/virtual/changes/{$config['context_key']}.php";
+$changes_default_path = MODX_BASE_PATH . "core/elements/modules/virtual/changes/web.php";
 
 $json_data = [];
 foreach ($json_data_path as $key => $path) {
@@ -29,7 +32,7 @@ foreach ($json_data_path as $key => $path) {
 
 // Объеденяем данные поддомена с дефолтными
 if (!empty($json_data["current"])) {
-    $json_data["current"]["subdomain"] = $subdomain;
+    $json_data["current"]["subdomain"] = $config['subdomain'];
     $json_data = array_replace_recursive($json_data["default"], $json_data["current"]);
 } else {
     $json_data = $json_data['default'];
@@ -42,7 +45,12 @@ if (empty($json_data)) {
 $modx->setPlaceholder('virtual', $json_data);
 
 // Подмена топонимов
-$changes = include $changes_path;
+if (file_exists($changes_path)) {
+    $changes = include $changes_path;
+} else {
+    $changes = include $changes_default_path;
+}
+
 
 if (isset($modx->resource->_output)) {
     $output = &$modx->resource->_output;
