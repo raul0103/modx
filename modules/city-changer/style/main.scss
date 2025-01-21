@@ -1,0 +1,158 @@
+.cc-modal {
+  position: absolute;
+  right: 1%;
+  top: 12%;
+  z-index: 999;
+  background: #fff;
+  border-radius: 5px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 5px  #00000044;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
+  visibility: hidden;
+  max-width: 280px;
+  text-align: center;
+
+  &.hide {
+    display: none;
+  }
+
+  &__info {
+    font-size: .8em;
+    padding-top: 1em;
+  }
+  &__city-name {
+    font-size: 16px;
+    padding: 10px;
+    padding-bottom: 0;
+    span {
+      font-weight: 800;
+    }
+  }
+
+  &__controls {
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    button {
+      flex: 1;
+      padding: 10px;
+      background: #f3f5f5;
+      border-radius: 3px;
+      transition: 0.3s;
+      &:hover {
+        background: #d5d5d5;
+      }
+    }
+    button:first-child {
+      @include set_colors_1(background-color);
+      // background: #73b017;
+      color: #fff;
+      &:hover {
+        @include set_colors_3(background-color);
+        // background: #ebaf00;
+      }
+    }
+  }
+}
+
+.cc-modal-list {
+  display: none;
+  &.show {
+    display: block;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+    visibility: hidden;
+  }
+
+  &__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  &__container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 3px;
+    border: 1px solid #f0f0f0;
+    z-index: 1000;
+    min-width: 300px;
+  }
+
+  &__header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eaeaea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 17px;
+    font-weight: bold;
+  }
+
+  &__btn-close {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    &:hover {
+      opacity: 0.7;
+    }
+    &::before,
+    &::after {
+      content: "";
+      display: block;
+      position: absolute;
+
+      left: 8px;
+      width: 16px;
+      height: 1px;
+      background-color: #000000;
+    }
+
+    &::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+  }
+  &__item {
+    transition: 0.3s;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
