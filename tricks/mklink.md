@@ -1,0 +1,1 @@
+mklink /j elements C:\Users\rshak\Desktop\GIT\proectstroy-p\core\elements
