@@ -10,31 +10,42 @@
 
 if (empty($data) || empty($ids)) return;
 
+if (gettype($ids) == 'string')
+    $ids = explode(',', $ids);
+
+
 if (!function_exists('filterResourcesByIds')) {
     function filterResourcesByIds($data, $ids)
     {
         $result = [];
+        $items_map = [];
 
-        // Рекурсивная функция для поиска ресурсов по ID
-        $find_resources = function ($items) use (&$find_resources, &$result, $ids) {
+        // Рекурсивная функция для создания мапы id => элемент
+        $map_resources = function ($items) use (&$map_resources, &$items_map) {
             foreach ($items as $item) {
-                if (in_array($item['id'], $ids)) {
-                    $result[] = $item;
-                }
+                $items_map[$item['id']] = $item;
 
-                // Если есть дочерние элементы, обходим их рекурсивно
+                // Если есть дочерние элементы, обрабатываем их
                 if (isset($item['children']) && is_array($item['children'])) {
-                    $find_resources($item['children']);
+                    $map_resources($item['children']);
                 }
             }
         };
 
-        // Запускаем поиск
-        $find_resources($data);
+        // Заполняем мапу
+        $map_resources($data);
+
+        // Формируем результат в порядке переданных $ids
+        foreach ($ids as $id) {
+            if (isset($items_map[$id])) {
+                $result[] = $items_map[$id];
+            }
+        }
 
         return $result;
     }
 }
+
 
 $cache_name = md5(serialize($scriptProperties));
 $cache_options = [
