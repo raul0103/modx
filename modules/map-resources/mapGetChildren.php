@@ -10,20 +10,21 @@
 if (empty($data) || empty($parent_id)) return;
 
 if (!function_exists('getChildren')) {
-    function getChildren($data, $parent_id)
+    function getChildren($data, $parent_id, &$result = [])
     {
+
         foreach ($data as $item) {
-            if ($item['id'] == $parent_id) {
-                return $item['children'];
+            if ($item['parent'] == $parent_id) {
+                $result[] = $item;
             }
 
             // Если есть дочерние элементы, обрабатываем их
             if (isset($item['children']) && is_array($item['children'])) {
-                getChildren($item['children'], $parent_id);
+                getChildren($item['children'], $parent_id, $result);
             }
         }
 
-        return [];
+        return $result;
     }
 }
 

@@ -1,0 +1,68 @@
+/* Основной контейнер */
+.custom-select {
+  position: relative;
+  width: 300px;
+
+  /* Кнопка селекта */
+  button {
+    width: 100%;
+    padding: 10px;
+    background: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    cursor: pointer;
+    text-align: left;
+
+    border: 1px solid red;
+    color: green;
+    border-radius: 8px;
+    font-weight: 400;
+    transition: 0.2s;
+
+    &:hover {
+      border-color: red;
+    }
+  }
+
+  /* Выпадающий список */
+  &__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+
+    &-item {
+      padding: 5px 10px;
+      cursor: pointer;
+      color: blue;
+      transition: background 0.2s;
+      &:hover {
+        background: #f0f0f0;
+      }
+    }
+
+    &-group {
+      padding: 10px;
+      border-bottom: 1px solid #eaeaea;
+      &-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+    }
+  }
+
+  /* Скрытый элемент */
+  .hidden {
+    display: none;
+  }
+}
