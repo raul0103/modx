@@ -32,7 +32,7 @@ class similarProducts
             'parent' => $modx->resource->parent
         ];
         $this->settings = [
-            'search_product_depth' => 1 // Глубина поиска товаров
+            'search_product_depth' => 10 // Глубина поиска товаров
         ];
 
         $this->cache = [
@@ -55,14 +55,19 @@ class similarProducts
         $parent_ids = $this->getParentsIds();
         $find_products = $this->findProductsMain($product_options, $parent_ids);
 
-        $product_ids = $this->getProductIds($find_products);
+        if (!empty($find_products)) {
+            $product_ids = $this->getProductIds($find_products);
 
-        $is_find_reserve = $this->isFindReserve($find_products, $product_ids);
-        if ($is_find_reserve && !empty($this->reserve_options)) {
-            $find_products = $this->findProductsReserve($product_options, $product_ids);
+            $is_find_reserve = $this->isFindReserve($find_products, $product_ids);
+            if ($is_find_reserve && !empty($product_options['reserve'])) {
+                $find_products = $this->findProductsReserve($product_options, $product_ids);
+            }
+
+            $output = $this->result($find_products);
+        } else {
+            $output = null;
         }
 
-        $output = $this->result($find_products);
         $this->modx->cacheManager->set($this->cache['name'], $output, 0, $this->cache['options']);
         return $output;
     }
@@ -88,7 +93,7 @@ class similarProducts
         foreach ($rows as $row) {
             if (in_array($row['key'], $this->main_options)) {
                 $product_options['main'][] = $row;
-            } else {
+            } else if (in_array($row['key'], $this->reserve_options)) {
                 $product_options['reserve'][] = $row;
             }
         }
