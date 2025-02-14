@@ -1,0 +1,30 @@
+@use "../../../../../_src/scss/base/variables.scss";
+
+[data-split-unit]:not(.opened) {
+  display: none;
+}
+
+.split-unit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+  }
+  button {
+    font-size: 12px;
+    padding: 6px 3px;
+    &.active {
+      background: variables.$red;
+      color: #fff;
+    }
+  }
+}
+
+.split-unit-price {
+  font-weight: 600;
+}
