@@ -9,3 +9,23 @@
     'reserve_options' => ['plotnost'],
   ]}
 ```
+
+## Доступные поля в JSON
+
+Все настройки для вызова сниппета хранятся в JSON файлах /assets/template/json/similar-products/"~$\_modx->context.key~".json
+
+```json
+{
+  "title": "Толщина:", // Название выборки - отображается над select
+  "selection_option": "item_thickness", // Опция по которой будет выборка (список значений например толщин)
+  "main_options": [
+    "collection",
+    "item_width",
+    "item_length",
+    "produktovaya-lineyka"
+  ], // Опции по которым будет поиск похожих товаров
+  "reserve_options": ["plotnost"], // Опции по которым будет поиск похожих товаров если первой выборки будет не достаточно
+  "unit": "ММ", // Единица измерения. Будет рядом с каджым значением в select
+  "colored-tiles": false // Если true то на странице товара выведет плитки цветов
+}
+```

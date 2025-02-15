@@ -1,0 +1,26 @@
+.colored-tiles {
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #fff;
+
+  &__title {
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  &__row {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: 1fr 1fr 1fr;
+
+    max-height: 158px;
+    overflow: auto;
+  }
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(122, 122, 122);
+    color: #fff !important;
+    padding: 15px;
+  }
+}

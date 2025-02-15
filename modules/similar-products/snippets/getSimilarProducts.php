@@ -8,214 +8,246 @@
  * reserve_options [Array] - Массив опций по которым будет выборка ЕСЛИ в первом варианте будут дубли
  */
 
-class similarProducts
-{
-    static $selection_option;
-    static $main_options;
-    static $reserve_options;
-    static $modx;
-    static $table_prefix;
-    static $current_product;
-    static $settings;
-    static $cache;
-
-    public function __construct($selection_option, $main_options, $reserve_options, $modx)
+if (!class_exists('similarProducts')) {
+    class similarProducts
     {
-        $this->selection_option = $selection_option;
-        $this->main_options = $main_options;
-        $this->reserve_options = $reserve_options;
-        $this->modx = $modx;
-        $this->table_prefix = $modx->getOption('table_prefix');
+        static $selection_option;
+        static $main_options;
+        static $reserve_options;
+        static $modx;
+        static $table_prefix;
+        static $current_product;
+        static $settings;
+        static $cache;
 
-        $this->current_product = [
-            'id' => $modx->resource->id,
-            'parent' => $modx->resource->parent
-        ];
-        $this->settings = [
-            'search_product_depth' => 10 // Глубина поиска товаров
-        ];
+        public function __construct($selection_option, $main_options, $reserve_options, $modx)
+        {
+            $this->selection_option = $selection_option;
+            $this->main_options = $main_options;
+            $this->reserve_options = $reserve_options;
+            $this->modx = $modx;
+            $this->table_prefix = $modx->getOption('table_prefix');
 
-        $this->cache = [
-            'name' => $modx->resource->id,
-            'options' => [
-                xPDO::OPT_CACHE_KEY => 'default/similar-products/' . $modx->resource->context_key . '/',
-            ]
-        ];
-    }
-    public function init()
-    {
-        if ($output = $this->modx->cacheManager->get($this->cache['name'], $this->cache['options'])) {
+            $this->current_product = [
+                'id' => $modx->resource->id,
+                'parent' => $modx->resource->parent
+            ];
+            $this->settings = [
+                'search_product_depth' => 10 // Глубина поиска товаров
+            ];
+
+            $this->cache = [
+                'name' => $modx->resource->id,
+                'options' => [
+                    xPDO::OPT_CACHE_KEY => 'default/similar-products/' . $modx->resource->context_key . '/',
+                ]
+            ];
+        }
+        public function init()
+        {
+            if ($output = $this->modx->cacheManager->get($this->cache['name'], $this->cache['options'])) {
+                return $output;
+            }
+
+            if (!$this->selection_option || !$this->main_options) return;
+            if (!$this->reserve_options) $this->reserve_options = [];
+
+            $product_options = $this->getCurrentProductOptions();
+            $parent_ids = $this->getParentsIds();
+            $find_products = $this->findProductsMain($product_options, $parent_ids);
+            $find_products = $this->deleteDoubles($find_products);
+
+            if (!empty($find_products)) {
+                $product_ids = $this->getProductIds($find_products);
+
+                $is_find_reserve = $this->isFindReserve($find_products, $product_ids);
+                if ($is_find_reserve && !empty($product_options['reserve'])) {
+                    $find_products = $this->findProductsReserve($product_options, $product_ids);
+                }
+
+                $output = $this->result($find_products);
+            } else {
+                $output = null;
+            }
+
+            $this->modx->cacheManager->set($this->cache['name'], $output, 0, $this->cache['options']);
             return $output;
         }
 
-        if (!$this->selection_option || !$this->main_options) return;
-        if (!$this->reserve_options) $this->reserve_options = [];
+        /**
+         * Удалит дубли товаров по ключевой опции selection_option
+         */
+        public function deleteDoubles($find_products)
+        {
+            $unique = [];
+            $result = [];
 
-        $product_options = $this->getCurrentProductOptions();
-        $parent_ids = $this->getParentsIds();
-        $find_products = $this->findProductsMain($product_options, $parent_ids);
-
-        if (!empty($find_products)) {
-            $product_ids = $this->getProductIds($find_products);
-
-            $is_find_reserve = $this->isFindReserve($find_products, $product_ids);
-            if ($is_find_reserve && !empty($product_options['reserve'])) {
-                $find_products = $this->findProductsReserve($product_options, $product_ids);
+            foreach ($find_products as $find_product) {
+                if (!isset($unique[$find_product['value']])) {
+                    $unique[$find_product['value']] = true;
+                    $result[] = $find_product;
+                }
             }
 
-            $output = $this->result($find_products);
-        } else {
-            $output = null;
+            return $result;
         }
 
-        $this->modx->cacheManager->set($this->cache['name'], $output, 0, $this->cache['options']);
-        return $output;
-    }
-
-    /**
-     * Получить значения опций по текущему товару
-     * По этим данным будут найдены похожие товары
-     */
-    public function getCurrentProductOptions()
-    {
-        $options_merge = array_merge($this->main_options, $this->reserve_options);
-        $options_merge = implode("','", $options_merge);
-        $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id = {$this->current_product['id']} AND `key` in ('$options_merge')";
-        $result = $this->modx->query($sql);
-        $rows = $result->fetchAll(PDO::FETCH_ASSOC);
-
-        // Разбили опции текущего товара на части
-        $product_options = [
-            'main' => [], // Основные опции
-            'reserve' => [] // Дополнительные
-        ];
-
-        foreach ($rows as $row) {
-            if (in_array($row['key'], $this->main_options)) {
-                $product_options['main'][] = $row;
-            } else if (in_array($row['key'], $this->reserve_options)) {
-                $product_options['reserve'][] = $row;
-            }
-        }
-        return $product_options;
-    }
-
-    /**
-     * Получить все дочерние категории по родителю текущего товара
-     * Сформируем IDs parents для выборки по ним товаров
-     */
-    public function getParentsIds()
-    {
-        $parent_ids = [];
-        $resources_prev_ids = []; // Родители после каждой итерации, для получения следующей вложенности
-        for ($i = 1; $i <= $this->settings['search_product_depth']; $i++) {
-            if ($i > 1 && empty($resources_prev_ids)) continue;
-            if ($i > 1) {
-                $parents = implode(',', $resources_prev_ids);
-            }
-
-            if (isset($parents)) {
-                $where_parents = "sc.parent IN ($parents)";
-            } else {
-                $where_parents = "parent = {$this->current_product['parent']}";
-            }
-
-            $sql = "SELECT id FROM {$this->table_prefix}site_content AS sc WHERE class_key = 'msCategory' AND $where_parents";
+        /**
+         * Получить значения опций по текущему товару
+         * По этим данным будут найдены похожие товары
+         */
+        public function getCurrentProductOptions()
+        {
+            $options_merge = array_merge($this->main_options, $this->reserve_options);
+            $options_merge = implode("','", $options_merge);
+            $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id = {$this->current_product['id']} AND `key` in ('$options_merge')";
             $result = $this->modx->query($sql);
             $rows = $result->fetchAll(PDO::FETCH_ASSOC);
 
-            $resources_prev_ids = array_map(function ($item) {
-                return $item['id'];
-            }, $rows);
+            // Разбили опции текущего товара на части
+            $product_options = [
+                'main' => [], // Основные опции
+                'reserve' => [] // Дополнительные
+            ];
 
-            $parent_ids = array_merge($parent_ids, $rows);
-        }
-        $parent_ids = array_column($parent_ids, 'id');
-        $parent_ids[] = $this->current_product['parent'];
-
-        return $parent_ids;
-    }
-
-    /**
-     * Собираем товары по опциями текущего товара и полученным IDs parents
-     */
-    public function findProductsMain($product_options, $parent_ids)
-    {
-        $where_options = $this->generateWhereOptions($product_options['main']);
-        $parent_ids_implode = implode(',', $parent_ids);
-        $where_product_id = "(SELECT id FROM {$this->table_prefix}site_content WHERE id != {$this->current_product['id']} AND parent IN ($parent_ids_implode))";
-
-        // Запрос на получение всех опций по полученным товарам
-        $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN $where_product_id AND ($where_options) GROUP BY product_id);";
-        $result = $this->modx->query($sql);
-        return $result->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Собираем товары по дополнительным опциям
-     */
-    public function findProductsReserve($product_options, $product_ids)
-    {
-        $where_options = $this->generateWhereOptions($product_options['reserve']);
-        $where_product_id = implode(',', $product_ids);
-        $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN ($where_product_id) AND ($where_options) GROUP BY product_id);";
-        $result = $this->modx->query($sql);
-        return $result->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Проверяем если по опции по которой формируем результат есть дубли, то проводим поиск еще раз но уже с доп. опциями
-     * Что-бы оставить больше уникальных 
-     */
-    public function isFindReserve($find_product_main, $product_ids)
-    {
-        $selection_options = []; // Значения опций по которым формируется результат
-        foreach ($find_product_main as $find_product) {
-            if ($find_product['key'] == $this->selection_option) {
-                $selection_options[] = $find_product['value'];
-            }
-        }
-        $selection_options = array_unique($selection_options);
-
-        return count($product_ids) !== count($selection_options);
-    }
-
-    /**
-     * Получить товары по полученным ID и отдать необходимые поля массивом
-     */
-    public function result($find_products)
-    {
-        $product_ids = $this->getProductIds($find_products);
-        $product_ids = implode(',', $product_ids);
-        $sql = "SELECT id,pagetitle,uri FROM {$this->table_prefix}site_content WHERE id IN ($product_ids)";
-        $result = $this->modx->query($sql);
-        $rows = $result->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($rows as &$row) {
-            foreach ($find_products as $find_product) {
-                if ($find_product['product_id'] == $row['id'] && $find_product['key'] == $this->selection_option) {
-                    $row[$this->selection_option] = $find_product['value'];
+            foreach ($rows as $row) {
+                if (in_array($row['key'], $this->main_options)) {
+                    $product_options['main'][] = $row;
+                } else if (in_array($row['key'], $this->reserve_options)) {
+                    $product_options['reserve'][] = $row;
                 }
             }
+            return $product_options;
         }
 
-        return $rows;
-    }
+        /**
+         * Получить все дочерние категории по родителю текущего товара
+         * Сформируем IDs parents для выборки по ним товаров
+         */
+        public function getParentsIds()
+        {
+            $parent_ids = [];
+            $resources_prev_ids = []; // Родители после каждой итерации, для получения следующей вложенности
+            for ($i = 1; $i <= $this->settings['search_product_depth']; $i++) {
+                if ($i > 1 && empty($resources_prev_ids)) continue;
+                if ($i > 1) {
+                    $parents = implode(',', $resources_prev_ids);
+                }
 
-    static function generateWhereOptions($items)
-    {
-        $where_options = [];
-        foreach ($items as $item) {
-            $where_options[] = "(`key` = '{$item['key']}' AND `value` = '{$item['value']}')";
+                if (isset($parents)) {
+                    $where_parents = "sc.parent IN ($parents)";
+                } else {
+                    $where_parents = "parent = {$this->current_product['parent']}";
+                }
+
+                $sql = "SELECT id FROM {$this->table_prefix}site_content AS sc WHERE class_key = 'msCategory' AND $where_parents";
+                $result = $this->modx->query($sql);
+                $rows = $result->fetchAll(PDO::FETCH_ASSOC);
+
+                $resources_prev_ids = array_map(function ($item) {
+                    return $item['id'];
+                }, $rows);
+
+                $parent_ids = array_merge($parent_ids, $rows);
+            }
+            $parent_ids = array_column($parent_ids, 'id');
+            $parent_ids[] = $this->current_product['parent'];
+
+            return $parent_ids;
         }
-        return implode(' OR ', $where_options);
-    }
-    static function getProductIds($find_products)
-    {
-        $product_ids = array_column($find_products, 'product_id');
-        $product_ids = array_unique($product_ids);
-        $product_ids = array_values($product_ids);
-        return $product_ids;
+
+        /**
+         * Собираем товары по опциями текущего товара и полученным IDs parents
+         */
+        public function findProductsMain($product_options, $parent_ids)
+        {
+            $where_options = $this->generateWhereOptions($product_options['main']);
+            $parent_ids_implode = implode(',', $parent_ids);
+            $where_product_id = "(SELECT id FROM {$this->table_prefix}site_content WHERE id != {$this->current_product['id']} AND parent IN ($parent_ids_implode))";
+
+            // Запрос на получение всех опций по полученным товарам
+            $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN $where_product_id AND ($where_options) GROUP BY product_id);";
+            $result = $this->modx->query($sql);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        /**
+         * Собираем товары по дополнительным опциям
+         */
+        public function findProductsReserve($product_options, $product_ids)
+        {
+            $where_options = $this->generateWhereOptions($product_options['reserve']);
+            $where_product_id = implode(',', $product_ids);
+            $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN ($where_product_id) AND ($where_options) GROUP BY product_id);";
+            $result = $this->modx->query($sql);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        /**
+         * Проверяем если по опции по которой формируем результат есть дубли, то проводим поиск еще раз но уже с доп. опциями
+         * Что-бы оставить больше уникальных 
+         */
+        public function isFindReserve($find_product_main, $product_ids)
+        {
+            $selection_options = []; // Значения опций по которым формируется результат
+            foreach ($find_product_main as $find_product) {
+                if ($find_product['key'] == $this->selection_option) {
+                    $selection_options[] = $find_product['value'];
+                }
+            }
+            $selection_options = array_unique($selection_options);
+
+            return count($product_ids) !== count($selection_options);
+        }
+
+        /**
+         * Получить товары по полученным ID и отдать необходимые поля массивом
+         */
+        public function result($find_products)
+        {
+            $product_ids = $this->getProductIds($find_products);
+            $product_ids = implode(',', $product_ids);
+            $sql = "SELECT id,pagetitle,uri FROM {$this->table_prefix}site_content WHERE id IN ($product_ids)";
+            $result = $this->modx->query($sql);
+            $rows = $result->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($rows as $index => &$row) {
+                foreach ($find_products as $find_product) {
+                    if ($find_product['product_id'] == $row['id'] && $find_product['key'] == $this->selection_option) {
+                        $row['value'] = trim($find_product['value']);
+                        break;
+                    }
+                }
+
+                // Удаляем элемент из массива, если нет значения целевой опции
+                if (!$row['value']) {
+                    unset($rows[$index]);
+                }
+            }
+
+            // Сортируем массив по 'value' по возрастанию
+            usort($rows, function ($a, $b) {
+                return $a['value'] <=> $b['value'];
+            });
+
+            return $rows;
+        }
+
+        static function generateWhereOptions($items)
+        {
+            $where_options = [];
+            foreach ($items as $item) {
+                $where_options[] = "(`key` = '{$item['key']}' AND `value` = '{$item['value']}')";
+            }
+            return implode(' OR ', $where_options);
+        }
+        static function getProductIds($find_products)
+        {
+            $product_ids = array_column($find_products, 'product_id');
+            $product_ids = array_unique($product_ids);
+            $product_ids = array_values($product_ids);
+            return $product_ids;
+        }
     }
 }
 
