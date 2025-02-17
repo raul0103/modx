@@ -64,7 +64,9 @@ if (!class_exists('similarProducts')) {
                 if ($is_find_reserve && !empty($product_options['reserve'])) {
                     $find_products = $this->findProductsReserve($product_options, $product_ids);
                 }
+            }
 
+            if (!empty($find_products)) {
                 $output = $this->result($find_products);
             } else {
                 $output = null;
