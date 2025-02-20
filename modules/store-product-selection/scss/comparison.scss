@@ -1,0 +1,38 @@
+@use "../../../../../_src/scss/base/variables.scss";
+
+.comparison-product {
+  &__btn {
+    cursor: pointer;
+
+    width: 37.5px;
+    height: 37.5px;
+
+    svg {
+      max-width: 36px;
+      max-height: 36px;
+      transform: scale(0.7);
+    }
+
+    &.active {
+      background-color: variables.$red;
+      svg:nth-child(1) {
+        display: none;
+      }
+      svg:nth-child(2) {
+        display: block;
+      }
+    }
+
+    svg {
+      &:nth-child(1) {
+        margin-left: 3px;
+        margin-top: -1px;
+      }
+      &:nth-child(2) {
+        margin-left: 3px;
+        margin-top: -3px;
+        display: none;
+      }
+    }
+  }
+}
