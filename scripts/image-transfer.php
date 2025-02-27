@@ -3,21 +3,30 @@
 /**
  * Переместить ТВ картинки и записать новое значение
  */
+$CONFIG = [
+    'is_dev' => true, // Выведет в консоль старые и новые пути. Не запустит создание файлов
 
-$ctx = 'krovelnyjstroymarket';
-$tv_image_name = 'mainImage';
-$images_save_path = MODX_BASE_PATH . 'assets/images/categories/';
+    'context_key' => 'economstroi',
+    'tv_name' => 'main_image', // Название TV поля с изображением
+
+    'images_get_path' => "https://gazosilikatstroy.ru/assets/", // От куда тащим файлы
+    'images_save_path' => MODX_BASE_PATH . 'assets/images/categories/',
+
+    'log' => [
+        'passed' => MODX_BASE_PATH . "image-transfer-passed.log", // Пройденные ID
+        'report' => MODX_BASE_PATH . "image-transfer-report.log" // Отчет о выполнении
+    ],
+];
 
 // >>> create save dir
-if (!is_dir($images_save_path)) {
-    mkdir($images_save_path, 0777, true);
+if (!is_dir($CONFIG['images_save_path'])) {
+    mkdir($CONFIG['images_save_path'], 0777, true);
 }
 // <<<
 
-// >>> logs
-$filelog = MODX_BASE_PATH . "image-transfer-log.log";
-if (file_exists($filelog)) {
-    $passed_ids = file_get_contents($filelog);
+// >>> passed - Если скрипт упадает по таймауту, запускаем снова и он учтет уже пройденные ресы
+if (file_exists($CONFIG['log']['passed'])) {
+    $passed_ids = file_get_contents($CONFIG['log']['passed']);
     $passed_ids = explode(',', $passed_ids);
 } else {
     $passed_ids = [0]; // С пустым массиво where не найдет ресурсы
@@ -25,36 +34,46 @@ if (file_exists($filelog)) {
 // <<<
 
 $resrs = $modx->getIterator('modResource', [
-    // 'id' => 230740,
-    // 'class_key' => 'msProduct',
-    'context_key' => $ctx,
+    'class_key' => 'msCategory',
+    'context_key' => $CONFIG['context_key'],
     'id:NOT IN' => $passed_ids
 ]);
 
-foreach ($resrs as $res) {
-
-
-    $tv_image = $res->getTVValue($tv_image_name);
-    if (empty($tv_image) || strpos($tv_image, '_import') == false) continue;
-
-    $tv_image_path = MODX_BASE_PATH . $tv_image;
-    $tv_image_path = str_replace('/assets/_import', '_import', $tv_image_path);
-    $filename = basename($tv_image);
-    // echo $tv_image_path . ' -> ' . $images_save_path . $filename;
-
-    if (file_exists($tv_image_path)) file_put_contents($filelog, $res->id . ',', FILE_APPEND);
-
-    // if (copy($tv_image_path, $images_save_path . $filename)) {
-    //     // echo "Картинка успешно скопирована в новую папку!";
-
-    //     echo "images/categories/" . $filename;
-    // }
+function report($report_file_path, $status, $res_id, $tv_image_path, $new_path, $message = "")
+{
+    file_put_contents($report_file_path, "$status " . json_encode([
+        'resource_id' => $res_id,
+        'tv_image_path' => $tv_image_path,
+        'new_path' => $new_path,
+        'error' => $message
+    ], JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND | LOCK_EX);
 }
 
+foreach ($resrs as $res) {
+    $tv_image = $res->getTVValue($CONFIG['tv_name']);
+    if (empty($tv_image)) continue;
 
-// /home/stroymarket/web/alterteplo.ru/public_html/_import/files/import_images/774q3w13a66jo8mhvohlo26vo8jiir9m2 (1).jpg -> /home/stroymarket/web/alterteplo.ru/public_html/assets/images/categories/774q3w13a66jo8mhvohlo26vo8jiir9m2 (1).jpg
+    $tv_image_path = $CONFIG['images_get_path'] . $tv_image;
+    $new_path = $CONFIG['images_save_path'] . basename($tv_image);
 
+    // Если файл уже есть на сервере
+    if (file_exists(MODX_BASE_PATH . $tv_image)) {
+        report($CONFIG['log']['report'], "ОШИБКА", $res->id, $tv_image_path, $new_path, "Файл уже добавлен");
+        continue;
+    }
 
-// /home/stroymarket/web/alterteplo.ru/public_html/_import/files/import_images/774q3w13a66jo8mhvohlo26vo8jiir9m2 (1).jpg
+    if ($CONFIG['is_dev']) {
+        echo $tv_image_path . ' -> ' . $new_path . PHP_EOL;
+    } else {
+        if (!copy($tv_image_path, $new_path)) {
+            report($CONFIG['log']['report'], "ОШИБКА", $res->id, $tv_image_path, $new_path, "Не удалось перенести скопировать");
+        } else {
+            file_put_contents($CONFIG['log']['passed'], $res->id . ',', FILE_APPEND);
+            report($CONFIG['log']['report'], "УСПЕХ", $res->id, $tv_image_path, $new_path);
 
-// /home/stroymarket/web/alterteplo.ru/public_html/_import/files/import_images/3123123123.jpg
+            // Сохранили новый путь в TV
+            $res->setTVValue($CONFIG['tv_name'], str_replace(MODX_BASE_PATH, '', $new_path));
+            $res->save();
+        }
+    }
+}
