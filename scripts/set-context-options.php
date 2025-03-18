@@ -49,7 +49,7 @@ function handleStg($stg, $ctxKey, $stgKey, $stgVal)
         if ($resultSave) {
             echo "Успешно обновлена настройка $stgKey для контекста $ctxKey<br>";
         } else {
-            echo "Не удалось обновить настройку $stgKey для контекста $ctxKey<br>";
+            echo "Не удалось обновить настройку $stgKey для контекста $ctxKey<br>. message: {$resultSave->response}<br>";
         }
     }
 }
