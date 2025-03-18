@@ -38,7 +38,7 @@ function handleStg($stg, $ctxKey, $stgKey, $stgVal)
         if ($resultCreate->response['success']) {
             echo "Успешно создана настройка $stgKey для контекста $ctxKey<br>";
         } else {
-            echo "Не удалось создать настройку $stgKey для контекста $ctxKey. message: {$resultCreate->response}<br>";
+            echo "Не удалось создать настройку $stgKey для контекста $ctxKey. message: {$resultCreate->response['message']}<br>";
         }
 
         // $modx->error = new modError($modx);
@@ -49,7 +49,7 @@ function handleStg($stg, $ctxKey, $stgKey, $stgVal)
         if ($resultSave) {
             echo "Успешно обновлена настройка $stgKey для контекста $ctxKey<br>";
         } else {
-            echo "Не удалось обновить настройку $stgKey для контекста $ctxKey<br>. message: {$resultSave->response}<br>";
+            echo "Не удалось обновить настройку $stgKey для контекста $ctxKey<br>. message: {$resultSave->response['message']}<br>";
         }
     }
 }
