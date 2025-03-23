@@ -65,14 +65,18 @@ class ProductSelection {
    */
   updateCounts(cookie_key, count) {
     // Что-бы не бегать по странице скриптом при каждом нажатии
+    if (!this.find_elements.counters) {
+      this.find_elements.counters = {};
+    }
+
     let counter_elements;
-    if (this.find_elements.counters) {
-      counter_elements = this.find_elements.counters;
+    if (this.find_elements.counters[cookie_key]) {
+      counter_elements = this.find_elements.counters[cookie_key];
     } else {
       counter_elements = document.querySelectorAll(
         `[data-selection-key="${cookie_key}"]`
       );
-      this.find_elements.counters = counter_elements;
+      this.find_elements.counters[cookie_key] = counter_elements;
     }
 
     counter_elements.forEach((counter_element) => {

@@ -1,0 +1,97 @@
+@use "../../../../../../_src/scss/base/variables.scss";
+
+.cart-product-mini {
+  display: grid;
+  gap: 8px;
+
+  &__controls {
+    display: flex;
+    button {
+      // height: 100%;
+      padding: 0;
+      width: 43px;
+      min-width: 43px;
+      height: 43px;
+
+      @media (max-width: variables.$bp768) {
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+      }
+    }
+  }
+
+  input {
+    max-width: 90px;
+    min-width: 30px;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    background-color: variables.$light-gray-2;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 94px 1fr;
+    gap: 8px;
+    @media (max-width: variables.$bp768) {
+      grid-template-columns: 56px 1fr;
+    }
+  }
+
+  .show-active {
+    display: none;
+  }
+  &.active {
+    .hide-active {
+      display: none;
+    }
+    .show-active {
+      display: grid;
+    }
+  }
+
+  &__main-btn {
+    white-space: nowrap;
+
+    width: 100%;
+    min-height: 43px;
+
+    align-items: center;
+
+    padding: 2px 13px 3px;
+    font-weight: 700;
+
+    display: grid;
+    text-align: center;
+    gap: 0;
+
+    @media (max-width: variables.$bp768) {
+      min-width: auto;
+    }
+    @media (max-width: variables.$bp768) {
+      width: 56px;
+      height: 30px;
+      min-height: 30px;
+      padding: 0;
+      justify-content: center;
+
+      svg {
+        max-width: 24px;
+        max-height: 24px;
+      }
+    }
+    .main-text {
+      font-size: 12px;
+    }
+    .mini-text {
+      font-weight: 400;
+      text-transform: lowercase;
+      font-size: 12px;
+    }
+
+    &.show-active {
+      background-color: #73b017;
+    }
+  }
+}
