@@ -3,6 +3,12 @@
 if (!isset($parents)) return false;
 
 $cache_name = md5(serialize($scriptProperties));
+
+if ($save_cache_name) {
+    // Плейсхолдер используется для передачи названия в api и получения данных для каталога
+    $modx->setPlaceholder($save_cache_name, $cache_name);
+}
+
 $cache_options = [
     xPDO::OPT_CACHE_KEY => 'default/map-resources/' . $modx->resource->context_key . '/',
 ];
@@ -10,7 +16,7 @@ $cache_options = [
 if (!$output = $modx->cacheManager->get($cache_name, $cache_options)) {
 
     $depth = isset($depth) ? $depth : 0;
-    $fields = ["id", "pagetitle", "menutitle", "parent", "alias", "uri"]; // Поля получаемые у товаров
+    $fields = ["id", "pagetitle", "menutitle", "parent", "alias", "uri", "template"]; // Поля получаемые у товаров
     $table_prefix = $modx->getOption('table_prefix');
 
     // Формируем параметр $where
