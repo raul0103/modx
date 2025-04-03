@@ -1,9 +1,7 @@
-{* 88 - ЖБИ шаблон *}
-{if $_modx->resource.template in list [88]}
-
 {set $resource_standart = $_modx->resource.standart.0}
 
 {if $resource_standart}
+
     {if $resource_standart == 'ГОСТ'}
         {set $standart_search = "ТУ"}
     {else}
@@ -29,5 +27,4 @@
         {/foreach}
     </div>
 
-    {/if}
 {/if}
