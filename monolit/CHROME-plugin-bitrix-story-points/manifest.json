@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "Bitrix Story Points Setter",
+  "version": "1.0",
+  "description": "Добавляет кнопку для установки Story Points в Bitrix24",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://td.monolit-crm.ru/workgroups/group/*/tasks/task/view/*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+}
