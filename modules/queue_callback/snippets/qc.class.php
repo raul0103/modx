@@ -20,7 +20,10 @@ class QC
         global $modx;
         if (!$modx) {
             define('MODX_API_MODE', true);
-            include $_SERVER['DOCUMENT_ROOT'] . '/index.php';
+            if (!$path = $_SERVER['DOCUMENT_ROOT']) {
+                $path = dirname(__DIR__, 5);
+            }
+            include $path . '/index.php';
         }
 
         $this->modx = $modx;
