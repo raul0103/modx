@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="queue_callback" baseClass="xPDOObject" platform="mysql" defaultEngine="InnoDB">
+    <object class="QueueCallback" table="queue_callback" extends="xPDOSimpleObject">
+
+        <!-- ID сессии пользователя -->
+        <field key="session" dbtype="varchar" precision="500" phptype="string" null="false" />
+
+        <!-- URL для отправки -->
+        <field key="url" dbtype="varchar" precision="500" phptype="string" null="false" />
+
+        <!-- JSON-сообщение -->
+        <field key="data" dbtype="text" phptype="string" null="false" />
+
+        <!-- Дата создания -->
+        <field key="date" dbtype="datetime" phptype="datetime" null="false" />
+
+        <!-- Флаг "отправлено" -->
+        <field key="sent" dbtype="tinyint" precision="1" phptype="boolean" null="false" default="0" />
+
+        <!-- log -->
+        <field key="log" dbtype="text" phptype="string" null="true" />
+    </object>
+</model>

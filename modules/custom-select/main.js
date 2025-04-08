@@ -25,12 +25,12 @@ export default function initCustomSelect() {
         dropdown.classList.add("hidden");
       }
     });
-  });
 
-  // // Закрытие списка при клике вне области
-  // document.addEventListener("click", (event) => {
-  //   if (!event.target.closest(".custom-select")) {
-  //     dropdown.classList.add("hidden");
-  //   }
-  // });
+    // Закрытие списка при клике вне области
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".custom-select")) {
+        dropdown.classList.add("hidden");
+      }
+    });
+  });
 }
