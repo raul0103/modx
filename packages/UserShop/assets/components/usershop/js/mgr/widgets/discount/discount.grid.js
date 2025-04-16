@@ -247,7 +247,6 @@ UserShop.grid.UserDiscount.prototype.addDiscount = function () {
               success: function (response) {
                 const result = Ext.decode(response.responseText);
                 if (result.success) {
-                  MODx.msg.alert("Успех", "Скидка добавлена");
                   win.close();
                   Ext.getCmp("usershop-grid-discount").refresh();
                 } else {
