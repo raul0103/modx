@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="usershop" baseClass="xPDOObject" platform="mysql" defaultEngine="InnoDB" version="1.1">
+    <object class="OrderReviews" table="us_order_reviews" extends="xPDOSimpleObject">
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="order_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="content" dbtype="text" phptype="string" null="false" />
+        <field key="publishedon" dbtype="datetime" null="true"/>
+        <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>
+        <field key="admin_response" dbtype="text" phptype="string" null="true"/>
+
+        <!-- Индексы -->
+        <index alias="user_id" name="user_id" type="BTREE">
+            <column key="user_id"/>
+        </index>
+        <index alias="order_id" name="order_id" type="BTREE">
+            <column key="order_id"/>
+        </index>
+
+        <!-- Связи -->
+        <aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign"/>
+        <aggregate alias="Order" class="msOrder" local="order_id" foreign="id" cardinality="one" owner="foreign"/>
+    </object>
+
+    <object class="UserDiscount" table="us_user_discount" extends="xPDOSimpleObject">
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="discount" dbtype="int" precision="3" null="false" default="0"/>
+
+        <!-- Индексы -->
+        <index alias="user_id" name="user_id" type="BTREE">
+            <column key="user_id"/>
+        </index>
+
+        <!-- Связи -->
+        <aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign"/>
+    </object>
+</model>
