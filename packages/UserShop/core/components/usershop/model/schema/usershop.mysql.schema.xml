@@ -36,6 +36,7 @@
 
     <object class="UserTickets" table="us_user_tickets" extends="xPDOSimpleObject">
         <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="subject" dbtype="text" phptype="string" null="false" />
         <field key="content" dbtype="text" phptype="string" null="false" />
         <field key="publishedon" dbtype="datetime" null="true"/>
         <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>

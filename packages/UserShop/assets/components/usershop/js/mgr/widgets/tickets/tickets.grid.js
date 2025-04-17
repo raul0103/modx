@@ -8,6 +8,7 @@ UserShop.grid.UserTickets = function (config) {
     baseParams: { action: "mgr/tickets/getlist" },
     fields: [
       "id",
+      "subject",
       "user_id",
       "username",
       "content",
@@ -27,6 +28,7 @@ UserShop.grid.UserTickets = function (config) {
           return `<a href="${url}" target="_blank">${value}</a>`;
         },
       },
+      { header: "Тема обращения", dataIndex: "subject", width: 200 },
       { header: "Текст", dataIndex: "content", width: 200 },
       {
         header: "Статус",
