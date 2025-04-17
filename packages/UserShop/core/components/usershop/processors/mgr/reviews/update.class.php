@@ -1,5 +1,4 @@
 <?php
-// core/components/usershop/processors/mgr/review/update.class.php
 
 class OrderReviewsUpdateProcessor extends modObjectUpdateProcessor
 {
