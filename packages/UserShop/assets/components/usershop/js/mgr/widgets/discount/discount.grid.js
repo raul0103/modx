@@ -19,7 +19,12 @@ UserShop.grid.UserDiscount = function (config) {
           return `<a href="${url}" target="_blank">${value}</a>`;
         },
       },
-      { header: "Персональная скидка", dataIndex: "discount", width: 200 },
+      {
+        header: "Персональная скидка",
+        dataIndex: "discount",
+        width: 200,
+        sortable: true,
+      },
     ],
     tbar: {
       cls: "usershop-tbar",
@@ -75,42 +80,12 @@ UserShop.grid.UserDiscount.prototype.showContextMenu = function (
       },
       {
         text: "Удалить",
-        handler: () => this.deleteRecord(record),
+        handler: () => deleteRecord(record),
         scope: this,
       },
     ],
   });
   menu.showAt(coords);
-};
-
-// Метод для удаления записи
-UserShop.grid.UserDiscount.prototype.deleteRecord = function (record) {
-  Ext.Msg.confirm(
-    "Подтвердите действие",
-    "Вы уверены, что хотите удалить эту запись?",
-    function (btn) {
-      if (btn === "yes") {
-        Ext.Ajax.request({
-          url: UserShop.config.connector_url,
-          params: {
-            action: "mgr/discount/remove",
-            id: record.get("id"),
-          },
-          success: function (response) {
-            const result = Ext.decode(response.responseText);
-            if (result.success) {
-              Ext.getCmp("usershop-grid-discount").refresh();
-            } else {
-              MODx.msg.alert("Ошибка", result.message);
-            }
-          },
-          failure: function () {
-            MODx.msg.alert("Ошибка", "Ошибка при отправке запроса.");
-          },
-        });
-      }
-    }
-  );
 };
 
 // Окно редактирования
@@ -161,7 +136,6 @@ UserShop.grid.UserDiscount.prototype.updateRecord = function (record) {
             success: function (response) {
               const result = Ext.decode(response.responseText);
               if (result.success) {
-                MODx.msg.alert("Успех", "Скидка обновлена");
                 win.close();
                 Ext.getCmp("usershop-grid-discount").refresh();
               } else {
@@ -277,6 +251,36 @@ UserShop.grid.UserDiscount.prototype.addDiscount = function () {
   });
 
   win.show();
+};
+
+// Метод для удаления записи
+const deleteRecord = function (record) {
+  Ext.Msg.confirm(
+    "Подтвердите действие",
+    "Вы уверены, что хотите удалить эту запись?",
+    function (btn) {
+      if (btn === "yes") {
+        Ext.Ajax.request({
+          url: UserShop.config.connector_url,
+          params: {
+            action: "mgr/discount/remove",
+            id: record.get("id"),
+          },
+          success: function (response) {
+            const result = Ext.decode(response.responseText);
+            if (result.success) {
+              Ext.getCmp("usershop-grid-discount").refresh();
+            } else {
+              MODx.msg.alert("Ошибка", result.message);
+            }
+          },
+          failure: function () {
+            MODx.msg.alert("Ошибка", "Ошибка при отправке запроса.");
+          },
+        });
+      }
+    }
+  );
 };
 
 Ext.reg("usershop-grid-discount", UserShop.grid.UserDiscount);

@@ -98,6 +98,11 @@ UserShop.grid.OrderReviews.prototype.showContextMenu = function (
         },
         scope: this,
       },
+      {
+        text: "Удалить",
+        handler: () => deleteRecord(record),
+        scope: this,
+      },
     ],
   });
   menu.showAt(coords);
@@ -164,7 +169,6 @@ UserShop.grid.OrderReviews.prototype.updateRecord = function (record) {
             success: function (response) {
               const result = Ext.decode(response.responseText);
               if (result.success) {
-                MODx.msg.alert("Успех", "Отзыв обновлен");
                 win.close();
                 Ext.getCmp("usershop-grid-reviews").refresh();
               } else {
@@ -188,6 +192,36 @@ UserShop.grid.OrderReviews.prototype.updateRecord = function (record) {
   });
 
   win.show();
+};
+
+// Метод для удаления записи
+const deleteRecord = function (record) {
+  Ext.Msg.confirm(
+    "Подтвердите действие",
+    "Вы уверены, что хотите удалить эту запись?",
+    function (btn) {
+      if (btn === "yes") {
+        Ext.Ajax.request({
+          url: UserShop.config.connector_url,
+          params: {
+            action: "mgr/review/remove",
+            id: record.get("id"),
+          },
+          success: function (response) {
+            const result = Ext.decode(response.responseText);
+            if (result.success) {
+              Ext.getCmp("usershop-grid-reviews").refresh();
+            } else {
+              MODx.msg.alert("Ошибка", result.message);
+            }
+          },
+          failure: function () {
+            MODx.msg.alert("Ошибка", "Ошибка при отправке запроса.");
+          },
+        });
+      }
+    }
+  );
 };
 
 Ext.reg("usershop-grid-reviews", UserShop.grid.OrderReviews);
