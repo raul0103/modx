@@ -32,6 +32,13 @@ UserShop.widget.NavigationMenu = function (config) {
               (window.location.href =
                 "index.php?a=discount&namespace=usershop"),
           },
+          {
+            xtype: "button",
+            cls: getActiveClass("tickets"),
+            text: "Обращения",
+            handler: () =>
+              (window.location.href = "index.php?a=tickets&namespace=usershop"),
+          },
         ],
       },
     ],

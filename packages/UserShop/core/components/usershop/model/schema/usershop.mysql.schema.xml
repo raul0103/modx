@@ -33,4 +33,20 @@
         <!-- Связи -->
         <aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign"/>
     </object>
+
+    <object class="UserTickets" table="us_user_tickets" extends="xPDOSimpleObject">
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="content" dbtype="text" phptype="string" null="false" />
+        <field key="publishedon" dbtype="datetime" null="true"/>
+        <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>
+        <field key="admin_response" dbtype="text" phptype="string" null="true"/>
+
+        <!-- Индексы -->
+        <index alias="user_id" name="user_id" type="BTREE">
+            <column key="user_id"/>
+        </index>
+
+        <!-- Связи -->
+        <aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign"/>
+    </object>
 </model>
