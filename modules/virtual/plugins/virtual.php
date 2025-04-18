@@ -8,10 +8,7 @@
 
 if ($modx->context->key == 'mgr') return;
 
-// $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
-// $context_key = $modx->context->key;
-
-$config = include MODX_BASE_PATH . "core/elements/modules/virtual/config.php";
+$config = include MODX_BASE_PATH . "core/elements/modules/virtual/core/config.php";
 
 $json_data_path = [
     "current" => MODX_BASE_PATH . "core/elements/modules/virtual/json/{$config['context_key']}/{$config['subdomain']}.json",
@@ -32,7 +29,6 @@ foreach ($json_data_path as $key => $path) {
 
 // Объеденяем данные поддомена с дефолтными
 if (!empty($json_data["current"])) {
-    $json_data["current"]["subdomain"] = $config['subdomain'];
     $json_data = array_replace_recursive($json_data["default"], $json_data["current"]);
 } else {
     $json_data = $json_data['default'];
@@ -50,7 +46,6 @@ if (file_exists($changes_path)) {
 } else {
     $changes = include $changes_default_path;
 }
-
 
 if (isset($modx->resource->_output)) {
     $output = &$modx->resource->_output;
