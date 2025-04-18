@@ -1,16 +1,15 @@
-@use "../../../../_src/scss/base/variables.scss";
-
 /* Основной контейнер */
 .custom-select {
   position: relative;
-  width: 230px;
+  width: 100%;
+  // width: 230px;
+
+  &:focus {
+    border-color: $primary-dark;
+  }
 
   /* Кнопка селекта */
-  button {
-    width: 100%;
-    padding: 10px;
-    background: #fff;
-
+  [data-custom-select-btn] {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -21,25 +20,37 @@
     cursor: pointer;
     text-align: left;
 
-    border: 1px solid variables.$red;
-    color: variables.$red;
-    border-radius: 4px;
-    font-weight: 600;
+    // background-color: $secondary-light-gray;
+    // padding: 16px 24px;
+    // border-radius: 100px;
+    // border: 1px solid $secondary-light-gray;
+    color: $primary-dark;
+    font-weight: 500;
+    width: 100%;
+    gap: 16px;
     transition: 0.2s;
 
-    &:hover {
-      opacity: 0.7;
-    }
+    // &:hover {
+    //   opacity: 0.7;
+    // }
 
     &:after {
       content: "";
-      transform: rotate(42deg);
-      border: solid variables.$red;
+      position: absolute;
+      right: 20px;
+
+      transform: rotate(45deg);
+      border: solid #000;
       border-width: 0 3px 3px 0;
       display: inline-block;
       padding: 3px;
       transition: 0.2s;
       margin-top: -6px;
+    }
+    &.active {
+      &:after {
+        transform: rotate(224deg) translateY(-5px) translateX(-4px);
+      }
     }
   }
 
@@ -51,11 +62,12 @@
     right: 0;
     background: #fff;
     // border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: $small-radius;
     box-shadow: 10px 0 60px hsla(0, 0%, 79%, 0.4);
     max-height: 300px;
     overflow-y: auto;
     z-index: 100;
+    transition: 0.2s;
 
     &-item {
       padding: 5px 10px;
@@ -67,7 +79,7 @@
       transition: 0.2s;
       display: block;
       &:hover {
-        color: variables.$red;
+        color: $primary-dark;
       }
     }
 
@@ -75,14 +87,15 @@
       padding: 10px;
       // border-bottom: 1px solid #eaeaea;
       &-title {
-        font-weight: bold;
-        margin-bottom: 5px;
+        color: #686868;
+        margin: 0 16px 5px;
       }
     }
   }
 
   /* Скрытый элемент */
   .hidden {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
   }
 }
