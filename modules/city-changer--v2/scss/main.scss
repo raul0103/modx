@@ -1,0 +1,63 @@
+.city-changer {
+  position: relative;
+  overflow: hidden;
+
+  &__wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    min-height: 400px;
+
+    ul {
+      li {
+        list-style: none;
+      }
+    }
+  }
+
+  [data-city-changer-districts],
+  [data-city-changer-regions],
+  [data-city-changer-cities] {
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  [data-city-changer-search-values] {
+    overflow-x: auto;
+    position: absolute;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+
+    display: none;
+    &.opened {
+      display: block;
+    }
+  }
+
+  button {
+    padding: 5px 20px;
+    width: 100%;
+    text-align: start;
+
+    border: none;
+    border-left: 3px solid transparent;
+
+    background: none;
+    cursor: pointer;
+    transition: 0.2s;
+    &:hover {
+      opacity: 0.7;
+      background-color: #2e384d3b;
+    }
+    &.active {
+      background-color: #2e384d3b;
+      border-color: #182641;
+      opacity: 1 !important;
+    }
+  }
+
+  input {
+    margin-bottom: 24px;
+  }
+}
