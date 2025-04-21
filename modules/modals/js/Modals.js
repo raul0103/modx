@@ -62,6 +62,7 @@ export default class Modals {
   // Показывает контент из data-modal-body-after
   showBodyAfter() {
     let modal = this.current_opened;
+    if (!modal) return;
 
     let show_body_before = modal.querySelector(this.selectors.show_body_before);
     if (!show_body_before) return;
@@ -76,6 +77,7 @@ export default class Modals {
   // Показывает контент из data-modal-body-before
   showBodyBefore() {
     let modal = this.current_opened;
+    if (!modal) return;
 
     let show_body_before = modal.querySelector(this.selectors.show_body_before);
     if (!show_body_before) return;
