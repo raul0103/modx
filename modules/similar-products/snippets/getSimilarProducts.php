@@ -19,12 +19,14 @@ if (!class_exists('similarProducts')) {
         static $current_product;
         static $settings;
         static $cache;
+        static $show_current;
 
-        public function __construct($selection_option, $main_options, $reserve_options, $modx)
+        public function __construct($selection_option, $main_options, $reserve_options, $show_current, $modx)
         {
             $this->selection_option = $selection_option;
             $this->main_options = $main_options;
             $this->reserve_options = $reserve_options;
+            $this->show_current = $show_current;
             $this->modx = $modx;
             $this->table_prefix = $modx->getOption('table_prefix');
 
@@ -84,15 +86,36 @@ if (!class_exists('similarProducts')) {
          */
         public function deleteDoubles($find_products)
         {
-            $unique = [];
-            $result = [];
-
+            // 1. Оставили товары по selection_option
+            $current_product = null;
+            $products = [];
             foreach ($find_products as $find_product) {
-                if (!isset($unique[$find_product['value']])) {
-                    $unique[$find_product['value']] = true;
-                    $result[] = $find_product;
+                if ($find_product['key'] === $this->selection_option) {
+                    $products[] = $find_product;
+
+                    if ($find_product['product_id'] == $this->current_product['id']) {
+                        $current_product = $find_product;
+                    }
                 }
             }
+
+            // 2. Оставили уникальные товары
+            $unique = [];
+            $result = [];
+            foreach ($products as $product) {
+                if (!isset($unique[$product['value']])) {
+                    $unique[$product['value']] = true;
+
+                    if ($this->show_current && $product['value'] == $current_product['value']) {
+                        $result[] = $current_product;
+                    } else {
+                        $result[] = $product;
+                    }
+                }
+            }
+
+
+
 
             return $result;
         }
@@ -166,8 +189,12 @@ if (!class_exists('similarProducts')) {
          */
         public function findProductsMain($product_options, $parent_ids)
         {
+            if (!$this->show_current) {
+                $where_not_current_resource = "AND id != {$this->current_product['id']}";
+            }
+
             $parent_ids_implode = implode(',', $parent_ids);
-            $where_product_id = "(SELECT id FROM {$this->table_prefix}site_content WHERE id != {$this->current_product['id']} AND parent IN ($parent_ids_implode))";
+            $where_product_id = "(SELECT id FROM {$this->table_prefix}site_content WHERE parent IN ($parent_ids_implode) $where_not_current_resource)";
 
             if ($product_options) {
                 $where_options = $this->generateWhereOptions($product_options['main']);
@@ -260,7 +287,7 @@ if (!class_exists('similarProducts')) {
     }
 }
 
-$similarProducts = new similarProducts($selection_option, $main_options, $reserve_options, $modx);
+$similarProducts = new similarProducts($selection_option, $main_options, $reserve_options, $show_current, $modx);
 $result = $similarProducts->init();
 
 return $result;
