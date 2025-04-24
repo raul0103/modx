@@ -49,10 +49,13 @@ if (!class_exists('similarProducts')) {
                 return $output;
             }
 
-            if (!$this->selection_option || !$this->main_options) return;
+            if (!$this->selection_option) return;
             if (!$this->reserve_options) $this->reserve_options = [];
 
-            $product_options = $this->getCurrentProductOptions();
+            if ($this->main_options) {
+                $product_options = $this->getCurrentProductOptions();
+            }
+
             $parent_ids = $this->getParentsIds();
             $find_products = $this->findProductsMain($product_options, $parent_ids);
             $find_products = $this->deleteDoubles($find_products);
@@ -163,12 +166,16 @@ if (!class_exists('similarProducts')) {
          */
         public function findProductsMain($product_options, $parent_ids)
         {
-            $where_options = $this->generateWhereOptions($product_options['main']);
             $parent_ids_implode = implode(',', $parent_ids);
             $where_product_id = "(SELECT id FROM {$this->table_prefix}site_content WHERE id != {$this->current_product['id']} AND parent IN ($parent_ids_implode))";
 
+            if ($product_options) {
+                $where_options = $this->generateWhereOptions($product_options['main']);
+                $where_options = "AND ($where_options)";
+            }
+
             // Запрос на получение всех опций по полученным товарам
-            $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN $where_product_id AND ($where_options) GROUP BY product_id);";
+            $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN $where_product_id $where_options GROUP BY product_id);";
             $result = $this->modx->query($sql);
             return $result->fetchAll(PDO::FETCH_ASSOC);
         }
