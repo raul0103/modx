@@ -7,6 +7,7 @@
  * data-close-early="basket-window" - Закрыть передыдущие элементы. Указать название, для группировки элементов
  * data-toggle-not - Имея такой аттрибут элемент не будет закрыт при повторном нажатии
  * data-close-outside - Если указан то элемент будет закрыт при клике вне области
+ * data-event-mouseover="true" - Тогда так же срабатывает на событие наведения
  */
 export default function initOpened() {
   // Ранее открытые элементы
@@ -17,8 +18,9 @@ export default function initOpened() {
     let early_id = open_btn.dataset.closeEarly; // Если надо закрывать предыдущие элементы
     let open_btn_toggle_not = open_btn.dataset.toggleNot;
     let close_on_click_outside = open_btn.dataset.closeOutside === "true";
+    let event_mouseover = open_btn.dataset.eventMouseover;
 
-    open_btn.addEventListener("click", (event) => {
+    let handler = () => {
       let elem_id = open_btn.dataset.openedBtn;
       if (!elem_id) return;
 
@@ -60,7 +62,12 @@ export default function initOpened() {
           });
         }, 0);
       }
-    });
+    };
+
+    open_btn.addEventListener("click", handler);
+    if (event_mouseover) {
+      open_btn.addEventListener("mouseover", handler);
+    }
   });
 }
 
