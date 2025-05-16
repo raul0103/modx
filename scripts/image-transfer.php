@@ -4,19 +4,20 @@
  * Переместить ТВ картинки и записать новое значение
  */
 $CONFIG = [
-    'is_dev' => true, // Выведет в консоль старые и новые пути. Не запустит создание файлов
+    'is_dev' => false, // Выведет в консоль старые и новые пути. Не запустит создание файлов
 
-    'context_key' => 'economstroi',
-    'tv_name' => 'main_image', // Название TV поля с изображением
+    'context_key' => 'tagnerud',
+    'tv_name' => 'mainImage', // Название TV поля с изображением
 
-    'images_get_path' => "https://gazosilikatstroy.ru/assets/", // От куда тащим файлы
-    'images_save_path' => MODX_BASE_PATH . 'assets/images/categories/',
+    'images_get_path' => "https://gazosilikatstroy.ru", // От куда тащим файлы
 
     'log' => [
         'passed' => MODX_BASE_PATH . "image-transfer-passed.log", // Пройденные ID
         'report' => MODX_BASE_PATH . "image-transfer-report.log" // Отчет о выполнении
     ],
 ];
+
+$CONFIG['images_save_path'] = MODX_BASE_PATH . 'assets/images/categories/' . $CONFIG['context_key'] . '/';
 
 // >>> create save dir
 if (!is_dir($CONFIG['images_save_path'])) {
@@ -53,11 +54,12 @@ foreach ($resrs as $res) {
     $tv_image = $res->getTVValue($CONFIG['tv_name']);
     if (empty($tv_image)) continue;
 
-    $tv_image_path = $CONFIG['images_get_path'] . $tv_image;
+    $tv_image = ltrim(str_replace('/assets', 'assets', $tv_image), '/'); // нормализация
+    $tv_image_path = $CONFIG['images_get_path'] . '/' . $tv_image;
+    $local_path = MODX_BASE_PATH . $tv_image;
     $new_path = $CONFIG['images_save_path'] . basename($tv_image);
 
-    // Если файл уже есть на сервере
-    if (file_exists(MODX_BASE_PATH . $tv_image)) {
+    if (file_exists($local_path)) {
         report($CONFIG['log']['report'], "ОШИБКА", $res->id, $tv_image_path, $new_path, "Файл уже добавлен");
         continue;
     }
@@ -65,14 +67,15 @@ foreach ($resrs as $res) {
     if ($CONFIG['is_dev']) {
         echo $tv_image_path . ' -> ' . $new_path . PHP_EOL;
     } else {
-        if (!copy($tv_image_path, $new_path)) {
-            report($CONFIG['log']['report'], "ОШИБКА", $res->id, $tv_image_path, $new_path, "Не удалось перенести скопировать");
+        $image_data = @file_get_contents($tv_image_path);
+        if ($image_data === false) {
+            report($CONFIG['log']['report'], "ОШИБКА", $res->id, $tv_image_path, $new_path, "Не удалось скачать изображение");
         } else {
-            file_put_contents($CONFIG['log']['passed'], $res->id . ',', FILE_APPEND);
+            file_put_contents($new_path, $image_data);
+            file_put_contents($CONFIG['log']['passed'], $res->id . PHP_EOL, FILE_APPEND);
             report($CONFIG['log']['report'], "УСПЕХ", $res->id, $tv_image_path, $new_path);
 
-            // Сохранили новый путь в TV
-            $res->setTVValue($CONFIG['tv_name'], str_replace(MODX_BASE_PATH, '', $new_path));
+            $res->setTVValue($CONFIG['tv_name'], 'assets/images/categories/' . $CONFIG['context_key'] . '/' . basename($new_path));
             $res->save();
         }
     }
