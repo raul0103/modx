@@ -1,10 +1,10 @@
 <?php
 
-return function ($globaldata) {
+return function ($global_data) {
     return [
-        "Санкт-Петербург" => $globaldata["topo1"],
-        "в Санкт-Петербурге" => $globaldata["topo2"],
-        "по Санкт-Петербургу" => $globaldata["topo3"],
-        "Санкт-Петербурга" => $globaldata["topo4"],
+        "Санкт-Петербург" => $global_data["toponim"]["base"]["standart"],
+        "в Санкт-Петербурге" => $global_data["toponim"]["where"]["standart"],
+        "по Санкт-Петербургу" => $global_data["toponim"]["on"]["standart"],
+        "Санкт-Петербурга" => $global_data["toponim"]["what"]["standart"],
     ];
 };

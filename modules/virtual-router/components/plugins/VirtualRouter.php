@@ -15,8 +15,8 @@ include "$module_path/index.php";
 $virtual_router = new VirtualRouter();
 
 // Данные для подмены на странице
-$changes = $virtual_router->getChangesData($modx->context->key);
-if (!empty($modx->resource->_output) && is_array($changes)) {
+$changes = $virtual_router->getChangesData();
+if (!empty($changes) && is_array($changes) && !empty($modx->resource->_output)) {
     $output = &$modx->resource->_output;
 
     // Получаем шаблон из ключей (экранированных), сортируем по убыванию длины, чтобы избежать перекрытий

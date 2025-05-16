@@ -1,0 +1,17 @@
+{
+  "toponim": {
+    "base": {
+      "standart": "Раменское"
+    },
+    "where": {
+      "standart": "в Раменском"
+    },
+    "on": {
+      "standart": "по Раменскому"
+    },
+    "what": {
+      "standart": "Раменскому"
+    }
+  },
+  "address": "RAMENSKOE ADDRESS"
+}
