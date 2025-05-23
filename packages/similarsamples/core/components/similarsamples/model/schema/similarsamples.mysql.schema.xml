@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="similarsamples" baseClass="xPDOObject" platform="mysql" defaultEngine="InnoDB" version="1.1">
+    <object class="SSRules" table="ss_rules" extends="xPDOSimpleObject">
+        <field key="name" dbtype="text" phptype="string" null="false" />
+        <field key="context_key" dbtype="text" phptype="string" null="false" />
+        <field key="options" dbtype="text" phptype="string" null="false" />
+        <field key="categories" dbtype="text" phptype="string" null="false" />
+    </object>
+</model>

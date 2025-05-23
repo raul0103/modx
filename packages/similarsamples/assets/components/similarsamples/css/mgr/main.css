@@ -1,0 +1,33 @@
+.container {
+  padding: 15px;
+}
+.modx-page-header {
+  margin-bottom: 20px;
+}
+
+.similarsamples-navigation-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.similarsamples-navigation-menu .x-box-inner {
+  width: max-content !important;
+}
+.similarsamples-nav-link {
+  position: static;
+  top: 0px;
+  padding: 5px 15px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #000;
+}
+.similarsamples-nav-link.active {
+  background: #2d86b7;
+  color: #fff;
+}
+
+.similarsamples-tbar {
+  width: max-content !important;
+  margin-left: auto;
+}
