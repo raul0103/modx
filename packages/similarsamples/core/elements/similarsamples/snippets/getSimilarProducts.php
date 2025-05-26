@@ -1,64 +1,72 @@
 <?php
 
-if (empty($main_options) || empty($parents)) return;
-
 if (!class_exists('SimilarProductsFinder')) {
     class SimilarProductsFinder
     {
         private $modx;
         private $tablePrefix;
         private $currentProductId;
-        private $mainOptions;
-        private $initialParents;
         private $searchDepth = 3;
-        private $cache;
 
-        public function __construct($mainOptions, $parents, modX &$modx)
+        public function __construct(modX &$modx)
         {
             $this->modx = $modx;
             $this->tablePrefix = $modx->getOption('table_prefix');
             $this->currentProductId = $modx->resource->id;
-            $this->mainOptions = explode(',', $mainOptions);
-            $this->initialParents = explode(',', $parents);
-
-            $this->cache = [
-                'name' => md5(serialize([$mainOptions, $parents, $this->currentProductId])),
-                'options' => [
-                    xPDO::OPT_CACHE_KEY => 'default/similarsamples/' . $modx->resource->context_key . '/',
-                ]
-            ];
         }
 
         public function run()
         {
-            if ($output = $this->modx->cacheManager->get($this->cache['name'], $this->cache['options'])) {
-                return $output;
-            }
-
-            $options = $this->getProductOptions();
-            if (empty($options)) return;
-
-            $parentIds = $this->getAllNestedParentIds();
-            $products = $this->findSimilarProducts($options, $parentIds);
-
-            $result = [];
-            foreach ($products as $product) {
-                $result[] = (int)$product['product_id'];
-            }
+            $rules = $this->getRules();
             $result = [
-                'products' => array_values(array_unique($result)),
-                'parents' => $parentIds
+                'rules' => [],
+                'data' => []
             ];
 
-            $this->modx->cacheManager->set($this->cache['name'], $result, 0, $this->cache['options']);
+            foreach ($rules as $rule) {
+                $options = $this->getProductOptions($rule);
+                if (empty($options)) return;
+
+                $parentIds = $this->getAllNestedParentIds($rule);
+                $products = $this->findSimilarProducts($options, $parentIds);
+
+                $product_ids = [];
+                foreach ($products as $product) {
+                    $product_ids[] = (int)$product['product_id'];
+                }
+
+                $result['rules'][] = [
+                    'name' => $rule->name,
+                ];
+                $result['data'][] = [
+                    'products' => array_values(array_unique($product_ids)),
+                    'parents' => $parentIds
+                ];
+            }
+
             return $result;
         }
 
-        private function getProductOptions()
+        public function getRules()
         {
+            $parent = $this->modx->getObject('modResource', $this->modx->resource->parent);
+            $tv = $parent->getTVValue('similarsample');
+
+            if (!$tv) return [];
+
+            $this->modx->addPackage("similarsamples", $this->modx->getOption("core_path") . "components/similarsamples/model/");
+
+            $rules_ids = explode(',', $tv);
+            $rules = $this->modx->getCollection('SSRules', ['id:in' => $rules_ids]);
+            return $rules;
+        }
+
+        private function getProductOptions($rule)
+        {
+            $options = explode(",", $rule->options);
             $escapedKeys = array_map(function ($key) {
                 return $this->modx->quote($key);
-            }, $this->mainOptions);
+            }, $options);
             $keysStr = implode(',', $escapedKeys);
 
             $sql = "SELECT `key`, `value` FROM {$this->tablePrefix}ms2_product_options 
@@ -68,10 +76,11 @@ if (!class_exists('SimilarProductsFinder')) {
             return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
         }
 
-        private function getAllNestedParentIds()
+        private function getAllNestedParentIds($rule)
         {
-            $allParentIds = $this->initialParents;
-            $currentLevel = $this->initialParents;
+            $parents = explode(",", $rule->categories);
+            $allParentIds = $parents;
+            $currentLevel = $parents;
 
             for ($depth = 1; $depth <= $this->searchDepth; $depth++) {
                 if (empty($currentLevel)) break;
@@ -125,5 +134,23 @@ if (!class_exists('SimilarProductsFinder')) {
     }
 }
 
-$finder = new SimilarProductsFinder($main_options, $parents, $modx);
-return $finder->run();
+$cache = [
+    'name' => $modx->resource->id,
+    'options' => [
+        xPDO::OPT_CACHE_KEY => 'default/similarsamples/' . $modx->resource->context_key . '/',
+    ]
+];
+if ($output = $modx->cacheManager->get($cache['name'], $cache['options'])) {
+    return $pdoTools->getChunk("@FILE _modules/similarsamples/chunks/wrapper.tpl", ["data" => $output]);
+}
+
+$finder = new SimilarProductsFinder($modx);
+$result = $finder->run();
+
+$modx->cacheManager->set($cache['name'], $result, 0, $cache['options']);
+
+if (empty($result['data'])) return null;
+
+if ($pdoTools = $modx->getService('pdoTools')) {
+    return $pdoTools->getChunk("@FILE _modules/similarsamples/chunks/wrapper.tpl", ["data" => $result]);
+}
