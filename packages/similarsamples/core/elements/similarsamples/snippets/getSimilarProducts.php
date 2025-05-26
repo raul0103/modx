@@ -1,5 +1,10 @@
 <?php
 
+if (!$pdoTools = $modx->getService('pdoTools')) {
+    $modx->log(xPDO::LOG_LEVEL_ERROR, 'Ошибка загрузки pdoTools');
+    return;
+}
+
 if (!class_exists('SimilarProductsFinder')) {
     class SimilarProductsFinder
     {
@@ -151,6 +156,4 @@ $modx->cacheManager->set($cache['name'], $result, 0, $cache['options']);
 
 if (empty($result['data'])) return null;
 
-if ($pdoTools = $modx->getService('pdoTools')) {
-    return $pdoTools->getChunk("@FILE _modules/similarsamples/chunks/wrapper.tpl", ["data" => $result]);
-}
+return $pdoTools->getChunk("@FILE _modules/similarsamples/chunks/wrapper.tpl", ["data" => $result]);
