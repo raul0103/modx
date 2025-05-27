@@ -145,14 +145,12 @@ $cache = [
         xPDO::OPT_CACHE_KEY => 'default/similarsamples/' . $modx->resource->context_key . '/',
     ]
 ];
-if ($output = $modx->cacheManager->get($cache['name'], $cache['options'])) {
-    return $pdoTools->getChunk("@FILE _modules/similarsamples/chunks/wrapper.tpl", ["data" => $output]);
+
+if (!$result = $modx->cacheManager->get($cache['name'], $cache['options'])) {
+    $finder = new SimilarProductsFinder($modx);
+    $result = $finder->run();
+    $modx->cacheManager->set($cache['name'], $result, 0, $cache['options']);
 }
-
-$finder = new SimilarProductsFinder($modx);
-$result = $finder->run();
-
-$modx->cacheManager->set($cache['name'], $result, 0, $cache['options']);
 
 if (empty($result['data'])) return null;
 
