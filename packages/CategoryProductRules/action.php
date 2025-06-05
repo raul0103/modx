@@ -1,5 +1,5 @@
 <?php
-const PRODUCTION = false;
+const PRODUCTION = true;
 
 define('MODX_API_MODE', true);
 require_once dirname(dirname(dirname(dirname(__FILE__)))) . '/index.php';
