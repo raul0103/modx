@@ -1,0 +1,2000 @@
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Плагин управления тегами</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f4f8;
+      }
+      .category-card {
+        transition: all 0.3s ease;
+      }
+      .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .modal {
+        transition: opacity 0.3s ease;
+      }
+      .table-container {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+      }
+      .table-container.open {
+        max-height: 1000px;
+      }
+      .context-section {
+        border-left: 4px solid;
+      }
+    </style>
+    <style>
+      *,
+      ::before,
+      ::after {
+        --tw-border-spacing-x: 0;
+        --tw-border-spacing-y: 0;
+        --tw-translate-x: 0;
+        --tw-translate-y: 0;
+        --tw-rotate: 0;
+        --tw-skew-x: 0;
+        --tw-skew-y: 0;
+        --tw-scale-x: 1;
+        --tw-scale-y: 1;
+        --tw-pan-x: ;
+        --tw-pan-y: ;
+        --tw-pinch-zoom: ;
+        --tw-scroll-snap-strictness: proximity;
+        --tw-gradient-from-position: ;
+        --tw-gradient-via-position: ;
+        --tw-gradient-to-position: ;
+        --tw-ordinal: ;
+        --tw-slashed-zero: ;
+        --tw-numeric-figure: ;
+        --tw-numeric-spacing: ;
+        --tw-numeric-fraction: ;
+        --tw-ring-inset: ;
+        --tw-ring-offset-width: 0px;
+        --tw-ring-offset-color: #fff;
+        --tw-ring-color: rgb(59 130 246 / 0.5);
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 0 #0000;
+        --tw-blur: ;
+        --tw-brightness: ;
+        --tw-contrast: ;
+        --tw-grayscale: ;
+        --tw-hue-rotate: ;
+        --tw-invert: ;
+        --tw-saturate: ;
+        --tw-sepia: ;
+        --tw-drop-shadow: ;
+        --tw-backdrop-blur: ;
+        --tw-backdrop-brightness: ;
+        --tw-backdrop-contrast: ;
+        --tw-backdrop-grayscale: ;
+        --tw-backdrop-hue-rotate: ;
+        --tw-backdrop-invert: ;
+        --tw-backdrop-opacity: ;
+        --tw-backdrop-saturate: ;
+        --tw-backdrop-sepia: ;
+        --tw-contain-size: ;
+        --tw-contain-layout: ;
+        --tw-contain-paint: ;
+        --tw-contain-style: ;
+      }
+      ::backdrop {
+        --tw-border-spacing-x: 0;
+        --tw-border-spacing-y: 0;
+        --tw-translate-x: 0;
+        --tw-translate-y: 0;
+        --tw-rotate: 0;
+        --tw-skew-x: 0;
+        --tw-skew-y: 0;
+        --tw-scale-x: 1;
+        --tw-scale-y: 1;
+        --tw-pan-x: ;
+        --tw-pan-y: ;
+        --tw-pinch-zoom: ;
+        --tw-scroll-snap-strictness: proximity;
+        --tw-gradient-from-position: ;
+        --tw-gradient-via-position: ;
+        --tw-gradient-to-position: ;
+        --tw-ordinal: ;
+        --tw-slashed-zero: ;
+        --tw-numeric-figure: ;
+        --tw-numeric-spacing: ;
+        --tw-numeric-fraction: ;
+        --tw-ring-inset: ;
+        --tw-ring-offset-width: 0px;
+        --tw-ring-offset-color: #fff;
+        --tw-ring-color: rgb(59 130 246 / 0.5);
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
+        --tw-shadow: 0 0 #0000;
+        --tw-shadow-colored: 0 0 #0000;
+        --tw-blur: ;
+        --tw-brightness: ;
+        --tw-contrast: ;
+        --tw-grayscale: ;
+        --tw-hue-rotate: ;
+        --tw-invert: ;
+        --tw-saturate: ;
+        --tw-sepia: ;
+        --tw-drop-shadow: ;
+        --tw-backdrop-blur: ;
+        --tw-backdrop-brightness: ;
+        --tw-backdrop-contrast: ;
+        --tw-backdrop-grayscale: ;
+        --tw-backdrop-hue-rotate: ;
+        --tw-backdrop-invert: ;
+        --tw-backdrop-opacity: ;
+        --tw-backdrop-saturate: ;
+        --tw-backdrop-sepia: ;
+        --tw-contain-size: ;
+        --tw-contain-layout: ;
+        --tw-contain-paint: ;
+        --tw-contain-style: ;
+      } /* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */
+      *,
+      ::after,
+      ::before {
+        box-sizing: border-box;
+        border-width: 0;
+        border-style: solid;
+        border-color: #e5e7eb;
+      }
+      ::after,
+      ::before {
+        --tw-content: "";
+      }
+      :host,
+      html {
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+        -moz-tab-size: 4;
+        tab-size: 4;
+        font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        margin: 0;
+        line-height: inherit;
+      }
+      hr {
+        height: 0;
+        color: inherit;
+        border-top-width: 1px;
+      }
+      abbr:where([title]) {
+        -webkit-text-decoration: underline dotted;
+        text-decoration: underline dotted;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-size: inherit;
+        font-weight: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
+      b,
+      strong {
+        font-weight: bolder;
+      }
+      code,
+      kbd,
+      pre,
+      samp {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+        font-size: 1em;
+      }
+      small {
+        font-size: 80%;
+      }
+      sub,
+      sup {
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+        vertical-align: baseline;
+      }
+      sub {
+        bottom: -0.25em;
+      }
+      sup {
+        top: -0.5em;
+      }
+      table {
+        text-indent: 0;
+        border-color: inherit;
+        border-collapse: collapse;
+      }
+      button,
+      input,
+      optgroup,
+      select,
+      textarea {
+        font-family: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+        font-size: 100%;
+        font-weight: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        margin: 0;
+        padding: 0;
+      }
+      button,
+      select {
+        text-transform: none;
+      }
+      button,
+      input:where([type="button"]),
+      input:where([type="reset"]),
+      input:where([type="submit"]) {
+        -webkit-appearance: button;
+        background-color: transparent;
+        background-image: none;
+      }
+      :-moz-focusring {
+        outline: auto;
+      }
+      :-moz-ui-invalid {
+        box-shadow: none;
+      }
+      progress {
+        vertical-align: baseline;
+      }
+      ::-webkit-inner-spin-button,
+      ::-webkit-outer-spin-button {
+        height: auto;
+      }
+      [type="search"] {
+        -webkit-appearance: textfield;
+        outline-offset: -2px;
+      }
+      ::-webkit-search-decoration {
+        -webkit-appearance: none;
+      }
+      ::-webkit-file-upload-button {
+        -webkit-appearance: button;
+        font: inherit;
+      }
+      summary {
+        display: list-item;
+      }
+      blockquote,
+      dd,
+      dl,
+      figure,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      hr,
+      p,
+      pre {
+        margin: 0;
+      }
+      fieldset {
+        margin: 0;
+        padding: 0;
+      }
+      legend {
+        padding: 0;
+      }
+      menu,
+      ol,
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      dialog {
+        padding: 0;
+      }
+      textarea {
+        resize: vertical;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        opacity: 1;
+        color: #9ca3af;
+      }
+      [role="button"],
+      button {
+        cursor: pointer;
+      }
+      :disabled {
+        cursor: default;
+      }
+      audio,
+      canvas,
+      embed,
+      iframe,
+      img,
+      object,
+      svg,
+      video {
+        display: block;
+        vertical-align: middle;
+      }
+      img,
+      video {
+        max-width: 100%;
+        height: auto;
+      }
+      [hidden]:where(:not([hidden="until-found"])) {
+        display: none;
+      }
+      .container {
+        width: 100%;
+      }
+      @media (min-width: 640px) {
+        .container {
+          max-width: 640px;
+        }
+      }
+      @media (min-width: 768px) {
+        .container {
+          max-width: 768px;
+        }
+      }
+      @media (min-width: 1024px) {
+        .container {
+          max-width: 1024px;
+        }
+      }
+      @media (min-width: 1280px) {
+        .container {
+          max-width: 1280px;
+        }
+      }
+      @media (min-width: 1536px) {
+        .container {
+          max-width: 1536px;
+        }
+      }
+      .fixed {
+        position: fixed;
+      }
+      .absolute {
+        position: absolute;
+      }
+      .relative {
+        position: relative;
+      }
+      .inset-0 {
+        inset: 0px;
+      }
+      .right-3 {
+        right: 0.75rem;
+      }
+      .top-2 {
+        top: 0.5rem;
+      }
+      .z-50 {
+        z-index: 50;
+      }
+      .mx-auto {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .mb-1 {
+        margin-bottom: 0.25rem;
+      }
+      .mb-4 {
+        margin-bottom: 1rem;
+      }
+      .mb-6 {
+        margin-bottom: 1.5rem;
+      }
+      .mr-2 {
+        margin-right: 0.5rem;
+      }
+      .block {
+        display: block;
+      }
+      .flex {
+        display: flex;
+      }
+      .grid {
+        display: grid;
+      }
+      .hidden {
+        display: none;
+      }
+      .h-10 {
+        height: 2.5rem;
+      }
+      .min-h-screen {
+        min-height: 100vh;
+      }
+      .w-10 {
+        width: 2.5rem;
+      }
+      .w-64 {
+        width: 16rem;
+      }
+      .w-full {
+        width: 100%;
+      }
+      .min-w-full {
+        min-width: 100%;
+      }
+      .max-w-2xl {
+        max-width: 42rem;
+      }
+      .max-w-md {
+        max-width: 28rem;
+      }
+      .cursor-pointer {
+        cursor: pointer;
+      }
+      .grid-cols-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+      .items-center {
+        align-items: center;
+      }
+      .justify-end {
+        justify-content: flex-end;
+      }
+      .justify-center {
+        justify-content: center;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+      .gap-4 {
+        gap: 1rem;
+      }
+      .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-y-reverse: 0;
+        margin-top: calc(2rem * calc(1 - var(--tw-space-y-reverse)));
+        margin-bottom: calc(2rem * var(--tw-space-y-reverse));
+      }
+      .overflow-hidden {
+        overflow: hidden;
+      }
+      .overflow-x-auto {
+        overflow-x: auto;
+      }
+      .rounded {
+        border-radius: 0.25rem;
+      }
+      .rounded-lg {
+        border-radius: 0.5rem;
+      }
+      .rounded-md {
+        border-radius: 0.375rem;
+      }
+      .border {
+        border-width: 1px;
+      }
+      .border-b {
+        border-bottom-width: 1px;
+      }
+      .border-blue-500 {
+        --tw-border-opacity: 1;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
+      }
+      .border-gray-200 {
+        --tw-border-opacity: 1;
+        border-color: rgb(229 231 235 / var(--tw-border-opacity, 1));
+      }
+      .border-gray-300 {
+        --tw-border-opacity: 1;
+        border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
+      }
+      .border-purple-500 {
+        --tw-border-opacity: 1;
+        border-color: rgb(168 85 247 / var(--tw-border-opacity, 1));
+      }
+      .bg-black {
+        --tw-bg-opacity: 1;
+        background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
+      }
+      .bg-blue-300 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(147 197 253 / var(--tw-bg-opacity, 1));
+      }
+      .bg-blue-50 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1));
+      }
+      .bg-blue-600 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+      }
+      .bg-gray-100 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
+      }
+      .bg-gray-200 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+      }
+      .bg-gray-400 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1));
+      }
+      .bg-green-500 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1));
+      }
+      .bg-indigo-600 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(79 70 229 / var(--tw-bg-opacity, 1));
+      }
+      .bg-purple-50 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(250 245 255 / var(--tw-bg-opacity, 1));
+      }
+      .bg-red-500 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
+      }
+      .bg-red-600 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1));
+      }
+      .bg-white {
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+      }
+      .bg-opacity-50 {
+        --tw-bg-opacity: 0.5;
+      }
+      .bg-gradient-to-r {
+        background-image: linear-gradient(to right, var(--tw-gradient-stops));
+      }
+      .from-blue-600 {
+        --tw-gradient-from: #2563eb var(--tw-gradient-from-position);
+        --tw-gradient-to: rgb(37 99 235 / 0) var(--tw-gradient-to-position);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+      }
+      .to-indigo-700 {
+        --tw-gradient-to: #4338ca var(--tw-gradient-to-position);
+      }
+      .p-1 {
+        padding: 0.25rem;
+      }
+      .p-4 {
+        padding: 1rem;
+      }
+      .p-6 {
+        padding: 1.5rem;
+      }
+      .px-3 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+      .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+      .py-3 {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+      .py-6 {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
+      .py-8 {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+      }
+      .pb-2 {
+        padding-bottom: 0.5rem;
+      }
+      .pl-4 {
+        padding-left: 1rem;
+      }
+      .text-left {
+        text-align: left;
+      }
+      .text-2xl {
+        font-size: 1.5rem;
+        line-height: 2rem;
+      }
+      .text-lg {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+      }
+      .text-sm {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+      .text-xl {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+      }
+      .font-bold {
+        font-weight: 700;
+      }
+      .font-medium {
+        font-weight: 500;
+      }
+      .font-semibold {
+        font-weight: 600;
+      }
+      .leading-normal {
+        line-height: 1.5;
+      }
+      .text-blue-600 {
+        --tw-text-opacity: 1;
+        color: rgb(37 99 235 / var(--tw-text-opacity, 1));
+      }
+      .text-blue-700 {
+        --tw-text-opacity: 1;
+        color: rgb(29 78 216 / var(--tw-text-opacity, 1));
+      }
+      .text-gray-400 {
+        --tw-text-opacity: 1;
+        color: rgb(156 163 175 / var(--tw-text-opacity, 1));
+      }
+      .text-gray-500 {
+        --tw-text-opacity: 1;
+        color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+      }
+      .text-gray-600 {
+        --tw-text-opacity: 1;
+        color: rgb(75 85 99 / var(--tw-text-opacity, 1));
+      }
+      .text-gray-700 {
+        --tw-text-opacity: 1;
+        color: rgb(55 65 81 / var(--tw-text-opacity, 1));
+      }
+      .text-gray-800 {
+        --tw-text-opacity: 1;
+        color: rgb(31 41 55 / var(--tw-text-opacity, 1));
+      }
+      .text-gray-900 {
+        --tw-text-opacity: 1;
+        color: rgb(17 24 39 / var(--tw-text-opacity, 1));
+      }
+      .text-purple-700 {
+        --tw-text-opacity: 1;
+        color: rgb(126 34 206 / var(--tw-text-opacity, 1));
+      }
+      .text-red-600 {
+        --tw-text-opacity: 1;
+        color: rgb(220 38 38 / var(--tw-text-opacity, 1));
+      }
+      .text-white {
+        --tw-text-opacity: 1;
+        color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+      }
+      .shadow-lg {
+        --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color),
+          0 4px 6px -4px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+          var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+      }
+      .shadow-md {
+        --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color),
+          0 2px 4px -2px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+          var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+      }
+      .shadow-xl {
+        --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+          0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color),
+          0 8px 10px -6px var(--tw-shadow-color);
+        box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+          var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+      }
+      .transition {
+        transition-property: color, background-color, border-color, fill, stroke,
+          opacity, box-shadow, transform, filter, -webkit-text-decoration-color,
+          -webkit-backdrop-filter;
+        transition-property: color, background-color, border-color,
+          text-decoration-color, fill, stroke, opacity, box-shadow, transform,
+          filter, backdrop-filter;
+        transition-property: color, background-color, border-color,
+          text-decoration-color, fill, stroke, opacity, box-shadow, transform,
+          filter, backdrop-filter, -webkit-text-decoration-color,
+          -webkit-backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+      }
+      .hover\:bg-blue-700:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1));
+      }
+      .hover\:bg-gray-300:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
+      }
+      .hover\:bg-gray-50:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
+      }
+      .hover\:bg-indigo-700:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgb(67 56 202 / var(--tw-bg-opacity, 1));
+      }
+      .hover\:bg-red-700:hover {
+        --tw-bg-opacity: 1;
+        background-color: rgb(185 28 28 / var(--tw-bg-opacity, 1));
+      }
+      .hover\:text-blue-600:hover {
+        --tw-text-opacity: 1;
+        color: rgb(37 99 235 / var(--tw-text-opacity, 1));
+      }
+      .hover\:text-blue-800:hover {
+        --tw-text-opacity: 1;
+        color: rgb(30 64 175 / var(--tw-text-opacity, 1));
+      }
+      .hover\:text-gray-500:hover {
+        --tw-text-opacity: 1;
+        color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+      }
+      .hover\:text-green-600:hover {
+        --tw-text-opacity: 1;
+        color: rgb(22 163 74 / var(--tw-text-opacity, 1));
+      }
+      .hover\:text-red-600:hover {
+        --tw-text-opacity: 1;
+        color: rgb(220 38 38 / var(--tw-text-opacity, 1));
+      }
+      .hover\:text-red-800:hover {
+        --tw-text-opacity: 1;
+        color: rgb(153 27 27 / var(--tw-text-opacity, 1));
+      }
+      .focus\:outline-none:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
+      .focus\:ring-2:focus {
+        --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+          var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+        --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+          calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+        box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+          var(--tw-shadow, 0 0 #0000);
+      }
+      .focus\:ring-blue-300:focus {
+        --tw-ring-opacity: 1;
+        --tw-ring-color: rgb(147 197 253 / var(--tw-ring-opacity, 1));
+      }
+      .focus\:ring-blue-500:focus {
+        --tw-ring-opacity: 1;
+        --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1));
+      }
+      @media (min-width: 768px) {
+        .md\:grid-cols-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .md\:grid-cols-1 {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+      }
+      @media (min-width: 1024px) {
+        .lg\:grid-cols-3 {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .lg\:grid-cols-1 {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        .lg\:grid-cols-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen">
+      <!-- Header -->
+      <header
+        class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg"
+      >
+        <div class="container mx-auto px-4 py-6">
+          <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Управление тегами</h1>
+            <div class="relative">
+              <input
+                type="text"
+                id="search"
+                placeholder="Поиск..."
+                class="px-4 py-2 rounded-lg text-gray-800 w-64 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              />
+              <button class="absolute right-3 top-2 text-gray-500">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-700">
+            Категории и записи
+          </h2>
+          <div>
+            <button
+              onclick="openContextModal()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg mr-2 transition"
+            >
+              Новый контекст
+            </button>
+            <button
+              onclick="openCategoryModal()"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+            >
+              Новая категория
+            </button>
+          </div>
+        </div>
+
+        <!-- Contexts and Categories -->
+        <div id="contexts-container" class="space-y-8">
+          <!-- Web Context -->
+          <div class="context-section border-blue-500 pl-4 pb-2">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium text-blue-700">Контекст: Web</h3>
+              <div>
+                <button
+                  onclick="editContext('web')"
+                  class="text-gray-600 hover:text-blue-600 p-1"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  onclick="deleteContext('web')"
+                  class="text-gray-600 hover:text-red-600 p-1"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button
+                  onclick="openCategoryModal('web')"
+                  class="text-gray-600 hover:text-green-600 p-1"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-4">
+              <!-- Category Card -->
+              <div
+                class="category-card bg-white rounded-lg shadow-md overflow-hidden"
+              >
+                <div
+                  class="p-4 bg-blue-50 cursor-pointer"
+                  onclick="toggleTable('category1')"
+                >
+                  <div class="flex justify-between items-center">
+                    <h4 class="font-medium text-gray-800">Теги для ондулина</h4>
+                    <div>
+                      <button
+                        onclick="event.stopPropagation(); editCategory('category1')"
+                        class="text-gray-500 hover:text-blue-600 p-1"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button
+                        onclick="event.stopPropagation(); deleteCategory('category1')"
+                        class="text-gray-500 hover:text-red-600 p-1"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      <button
+                        onclick="event.stopPropagation(); openRecordModal('category1')"
+                        class="text-gray-500 hover:text-green-600 p-1"
+                      >
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div id="category1-table" class="table-container">
+                  <div class="p-4">
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full bg-white">
+                        <thead>
+                          <tr
+                            class="bg-gray-100 text-gray-600 text-sm leading-normal"
+                          >
+                            <th class="py-3 px-4 text-left">Название</th>
+                            <th class="py-3 px-4 text-left">Ссылка</th>
+                            <th class="py-3 px-4 text-left">Картинка</th>
+                            <th class="py-3 px-4 text-left">Тип</th>
+                            <th class="py-3 px-4 text-left">ID ресурса</th>
+                            <th class="py-3 px-4 text-left">Группа</th>
+                            <th class="py-3 px-4 text-left">Действия</th>
+                          </tr>
+                        </thead>
+                        <tbody class="text-gray-600 text-sm">
+                          <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-4">Ондулин красный</td>
+                            <td class="py-3 px-4">/ondulin-red</td>
+                            <td class="py-3 px-4">
+                              <div class="w-10 h-10 bg-red-500 rounded"></div>
+                            </td>
+                            <td class="py-3 px-4">Ресурс</td>
+                            <td class="py-3 px-4">123</td>
+                            <td class="py-3 px-4">Основная</td>
+                            <td class="py-3 px-4">
+                              <button
+                                onclick="editRecord('rec1')"
+                                class="text-blue-600 hover:text-blue-800 mr-2"
+                              >
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button
+                                onclick="deleteRecord('rec1')"
+                                class="text-red-600 hover:text-red-800"
+                              >
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                          <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-4">Ондулин зеленый</td>
+                            <td class="py-3 px-4">/ondulin-green</td>
+                            <td class="py-3 px-4">
+                              <div class="w-10 h-10 bg-green-500 rounded"></div>
+                            </td>
+                            <td class="py-3 px-4">Кастомный</td>
+                            <td class="py-3 px-4">-</td>
+                            <td class="py-3 px-4">Основная</td>
+                            <td class="py-3 px-4">
+                              <button
+                                onclick="editRecord('rec2')"
+                                class="text-blue-600 hover:text-blue-800 mr-2"
+                              >
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button
+                                onclick="deleteRecord('rec2')"
+                                class="text-red-600 hover:text-red-800"
+                              >
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Category Card -->
+              <div
+                class="category-card bg-white rounded-lg shadow-md overflow-hidden"
+              >
+                <div
+                  class="p-4 bg-blue-50 cursor-pointer"
+                  onclick="toggleTable('category2')"
+                >
+                  <div class="flex justify-between items-center">
+                    <h4 class="font-medium text-gray-800">
+                      Теги для металлочерепицы
+                    </h4>
+                    <div>
+                      <button
+                        onclick="event.stopPropagation(); editCategory('category2')"
+                        class="text-gray-500 hover:text-blue-600 p-1"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button
+                        onclick="event.stopPropagation(); deleteCategory('category2')"
+                        class="text-gray-500 hover:text-red-600 p-1"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      <button
+                        onclick="event.stopPropagation(); openRecordModal('category2')"
+                        class="text-gray-500 hover:text-green-600 p-1"
+                      >
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div id="category2-table" class="table-container open">
+                  <div class="p-4">
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full bg-white">
+                        <thead>
+                          <tr
+                            class="bg-gray-100 text-gray-600 text-sm leading-normal"
+                          >
+                            <th class="py-3 px-4 text-left">Название</th>
+                            <th class="py-3 px-4 text-left">Ссылка</th>
+                            <th class="py-3 px-4 text-left">Картинка</th>
+                            <th class="py-3 px-4 text-left">Тип</th>
+                            <th class="py-3 px-4 text-left">ID ресурса</th>
+                            <th class="py-3 px-4 text-left">Группа</th>
+                            <th class="py-3 px-4 text-left">Действия</th>
+                          </tr>
+                        </thead>
+                        <tbody class="text-gray-600 text-sm">
+                          <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-4">Металлочерепица Монтеррей</td>
+                            <td class="py-3 px-4">/monterrey</td>
+                            <td class="py-3 px-4">
+                              <div class="w-10 h-10 bg-gray-400 rounded"></div>
+                            </td>
+                            <td class="py-3 px-4">Ресурс</td>
+                            <td class="py-3 px-4">456</td>
+                            <td class="py-3 px-4">Премиум</td>
+                            <td class="py-3 px-4">
+                              <button
+                                onclick="editRecord('rec3')"
+                                class="text-blue-600 hover:text-blue-800 mr-2"
+                              >
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button
+                                onclick="deleteRecord('rec3')"
+                                class="text-red-600 hover:text-red-800"
+                              >
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile Context -->
+          <div class="context-section border-purple-500 pl-4 pb-2">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium text-purple-700">
+                Контекст: Mobile
+              </h3>
+              <div>
+                <button
+                  onclick="editContext('mobile')"
+                  class="text-gray-600 hover:text-blue-600 p-1"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  onclick="deleteContext('mobile')"
+                  class="text-gray-600 hover:text-red-600 p-1"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button
+                  onclick="openCategoryModal('mobile')"
+                  class="text-gray-600 hover:text-green-600 p-1"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-4">
+              <!-- Category Card -->
+              <div
+                class="category-card bg-white rounded-lg shadow-md overflow-hidden"
+              >
+                <div
+                  class="p-4 bg-purple-50 cursor-pointer"
+                  onclick="toggleTable('category3')"
+                >
+                  <div class="flex justify-between items-center">
+                    <h4 class="font-medium text-gray-800">Мобильные теги</h4>
+                    <div>
+                      <button
+                        onclick="event.stopPropagation(); editCategory('category3')"
+                        class="text-gray-500 hover:text-blue-600 p-1"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button
+                        onclick="event.stopPropagation(); deleteCategory('category3')"
+                        class="text-gray-500 hover:text-red-600 p-1"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                      <button
+                        onclick="event.stopPropagation(); openRecordModal('category3')"
+                        class="text-gray-500 hover:text-green-600 p-1"
+                      >
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div id="category3-table" class="table-container open">
+                  <div class="p-4">
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full bg-white">
+                        <thead>
+                          <tr
+                            class="bg-gray-100 text-gray-600 text-sm leading-normal"
+                          >
+                            <th class="py-3 px-4 text-left">Название</th>
+                            <th class="py-3 px-4 text-left">Ссылка</th>
+                            <th class="py-3 px-4 text-left">Картинка</th>
+                            <th class="py-3 px-4 text-left">Тип</th>
+                            <th class="py-3 px-4 text-left">ID ресурса</th>
+                            <th class="py-3 px-4 text-left">Группа</th>
+                            <th class="py-3 px-4 text-left">Действия</th>
+                          </tr>
+                        </thead>
+                        <tbody class="text-gray-600 text-sm">
+                          <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-4">Мобильный баннер</td>
+                            <td class="py-3 px-4">/mobile-banner</td>
+                            <td class="py-3 px-4">
+                              <div class="w-10 h-10 bg-blue-300 rounded"></div>
+                            </td>
+                            <td class="py-3 px-4">Кастомный</td>
+                            <td class="py-3 px-4">-</td>
+                            <td class="py-3 px-4">Баннеры</td>
+                            <td class="py-3 px-4">
+                              <button
+                                onclick="editRecord('rec4')"
+                                class="text-blue-600 hover:text-blue-800 mr-2"
+                              >
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button
+                                onclick="deleteRecord('rec4')"
+                                class="text-red-600 hover:text-red-800"
+                              >
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Context Modal -->
+    <div
+      id="contextModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal"
+    >
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900">
+            Создать новый контекст
+          </h3>
+          <button
+            onclick="closeContextModal()"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="contextForm">
+          <div class="mb-4">
+            <label
+              for="contextName"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Название контекста</label
+            >
+            <input
+              type="text"
+              id="contextName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="contextColor"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Цвет</label
+            >
+            <input
+              type="color"
+              id="contextColor"
+              value="#3B82F6"
+              class="w-full h-10 p-1 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              onclick="closeContextModal()"
+              class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300 transition"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onclick="saveContext()"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div
+      id="categoryModal"
+      class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 modal hidden"
+    >
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900">
+            Создать новую категорию
+          </h3>
+          <button
+            onclick="closeCategoryModal()"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="categoryForm">
+          <div class="mb-4">
+            <label
+              for="categoryName"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Название категории</label
+            >
+            <input
+              type="text"
+              id="categoryName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="categoryContext"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Контекст</label
+            >
+            <select
+              id="categoryContext"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="web">Web</option>
+              <option value="mobile">Mobile</option>
+            </select>
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              onclick="closeCategoryModal()"
+              class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300 transition"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onclick="saveCategory()"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Record Modal -->
+    <div
+      id="recordModal"
+      class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 modal hidden"
+    >
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900">
+            Создать новую запись
+          </h3>
+          <button
+            onclick="closeRecordModal()"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="recordForm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                for="recordName"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Название</label
+              >
+              <input
+                type="text"
+                id="recordName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label
+                for="recordLink"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Ссылка</label
+              >
+              <input
+                type="text"
+                id="recordLink"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                for="recordType"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Тип</label
+              >
+              <select
+                id="recordType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onchange="toggleResourceId()"
+              >
+                <option value="resource">Ресурс</option>
+                <option value="custom">Кастомный</option>
+              </select>
+            </div>
+            <div id="resourceIdContainer" style="display: none">
+              <label
+                for="resourceId"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >ID ресурса</label
+              >
+              <input
+                type="text"
+                id="resourceId"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label
+                for="recordGroup"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Группа</label
+              >
+              <input
+                type="text"
+                id="recordGroup"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label
+                for="recordImage"
+                class="block text-sm font-medium text-gray-700 mb-1"
+                >Цвет картинки</label
+              >
+              <input
+                type="color"
+                id="recordImage"
+                value="#3B82F6"
+                class="w-full h-10 p-1 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              onclick="closeRecordModal()"
+              class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300 transition"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onclick="saveRecord()"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div
+      id="deleteModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden modal"
+    >
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900">
+            Подтверждение удаления
+          </h3>
+          <button
+            onclick="closeDeleteModal()"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <p class="text-gray-600 mb-6">
+          Вы уверены, что хотите удалить
+          <span id="deleteItemName">этот элемент</span>? Это действие нельзя
+          отменить.
+        </p>
+        <div class="flex justify-end">
+          <button
+            type="button"
+            onclick="closeDeleteModal()"
+            class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2 hover:bg-gray-300 transition"
+          >
+            Отмена
+          </button>
+          <button
+            type="button"
+            onclick="confirmDelete()"
+            class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+          >
+            Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global variables
+      let currentCategoryId = null;
+      let currentItemToDelete = null;
+      let deleteType = null;
+
+      // Toggle table visibility
+      function toggleTable(categoryId) {
+        const tableContainer = document.getElementById(`${categoryId}-table`);
+        tableContainer.classList.toggle("open");
+      }
+
+      // Context Modal Functions
+      function openContextModal() {
+        document.getElementById("contextModal").classList.remove("hidden");
+        document.getElementById("contextModal").classList.add("flex");
+      }
+
+      function closeContextModal() {
+        document.getElementById("contextModal").classList.add("hidden");
+        document.getElementById("contextModal").classList.remove("flex");
+        document.getElementById("contextForm").reset();
+      }
+
+      function saveContext() {
+        const contextName = document.getElementById("contextName").value;
+        const contextColor = document.getElementById("contextColor").value;
+
+        if (!contextName) {
+          alert("Пожалуйста, введите название контекста");
+          return;
+        }
+
+        // Here you would typically save the context to your database
+        // For demo purposes, we'll just add it to the UI
+        const contextsContainer = document.getElementById("contexts-container");
+
+        const newContext = document.createElement("div");
+        newContext.className = "context-section pl-4 pb-2";
+        newContext.style.borderLeft = `4px solid ${contextColor}`;
+
+        newContext.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium" style="color: ${contextColor}">Контекст: ${contextName}</h3>
+                    <div>
+                        <button onclick="editContext('${contextName.toLowerCase()}')" class="text-gray-600 hover:text-blue-600 p-1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteContext('${contextName.toLowerCase()}')" class="text-gray-600 hover:text-red-600 p-1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button onclick="openCategoryModal('${contextName.toLowerCase()}')" class="text-gray-600 hover:text-green-600 p-1">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Categories will be added here -->
+                </div>
+            `;
+
+        contextsContainer.appendChild(newContext);
+        closeContextModal();
+      }
+
+      // Category Modal Functions
+      function openCategoryModal(contextId = null) {
+        document.getElementById("categoryModal").classList.remove("hidden");
+        document.getElementById("categoryModal").classList.add("flex");
+
+        if (contextId) {
+          document.getElementById("categoryContext").value = contextId;
+        }
+      }
+
+      function closeCategoryModal() {
+        document.getElementById("categoryModal").classList.add("hidden");
+        document.getElementById("categoryModal").classList.remove("flex");
+        document.getElementById("categoryForm").reset();
+      }
+
+      function saveCategory() {
+        const categoryName = document.getElementById("categoryName").value;
+        const contextId = document.getElementById("categoryContext").value;
+
+        if (!categoryName) {
+          alert("Пожалуйста, введите название категории");
+          return;
+        }
+
+        // Here you would typically save the category to your database
+        // For demo purposes, we'll just add it to the UI
+        const contexts = document.querySelectorAll(".context-section");
+        let targetContext = null;
+
+        contexts.forEach((context) => {
+          const contextTitle = context.querySelector("h3").textContent;
+          if (contextTitle.toLowerCase().includes(contextId)) {
+            targetContext = context;
+          }
+        });
+
+        if (targetContext) {
+          const categoriesContainer = targetContext.querySelector(".grid");
+          const categoryId = "category" + Math.floor(Math.random() * 1000);
+
+          const newCategory = document.createElement("div");
+          newCategory.className =
+            "category-card bg-white rounded-lg shadow-md overflow-hidden";
+
+          const bgColor = contextId === "web" ? "bg-blue-50" : "bg-purple-50";
+
+          newCategory.innerHTML = `
+                    <div class="p-4 ${bgColor} cursor-pointer" onclick="toggleTable('${categoryId}')">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-medium text-gray-800">${categoryName}</h4>
+                            <div>
+                                <button onclick="event.stopPropagation(); editCategory('${categoryId}')" class="text-gray-500 hover:text-blue-600 p-1">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteCategory('${categoryId}')" class="text-gray-500 hover:text-red-600 p-1">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); openRecordModal('${categoryId}')" class="text-gray-500 hover:text-green-600 p-1">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="${categoryId}-table" class="table-container">
+                        <div class="p-4">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-gray-600 text-sm leading-normal">
+                                            <th class="py-3 px-4 text-left">Название</th>
+                                            <th class="py-3 px-4 text-left">Ссылка</th>
+                                            <th class="py-3 px-4 text-left">Картинка</th>
+                                            <th class="py-3 px-4 text-left">Тип</th>
+                                            <th class="py-3 px-4 text-left">ID ресурса</th>
+                                            <th class="py-3 px-4 text-left">Группа</th>
+                                            <th class="py-3 px-4 text-left">Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 text-sm">
+                                        <!-- Records will be added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+          categoriesContainer.appendChild(newCategory);
+          closeCategoryModal();
+        }
+      }
+
+      // Record Modal Functions
+      function openRecordModal(categoryId) {
+        currentCategoryId = categoryId;
+        document.getElementById("recordModal").classList.remove("hidden");
+        document.getElementById("recordModal").classList.add("flex");
+      }
+
+      function closeRecordModal() {
+        document.getElementById("recordModal").classList.add("hidden");
+        document.getElementById("recordModal").classList.remove("flex");
+        document.getElementById("recordForm").reset();
+        currentCategoryId = null;
+      }
+
+      function toggleResourceId() {
+        const recordType = document.getElementById("recordType").value;
+        const resourceIdContainer = document.getElementById(
+          "resourceIdContainer"
+        );
+
+        if (recordType === "resource") {
+          resourceIdContainer.style.display = "block";
+        } else {
+          resourceIdContainer.style.display = "none";
+        }
+      }
+
+      function saveRecord() {
+        const recordName = document.getElementById("recordName").value;
+        const recordLink = document.getElementById("recordLink").value;
+        const recordType = document.getElementById("recordType").value;
+        const resourceId = document.getElementById("resourceId").value;
+        const recordGroup = document.getElementById("recordGroup").value;
+        const recordColor = document.getElementById("recordImage").value;
+
+        if (!recordName || !recordLink) {
+          alert("Пожалуйста, заполните обязательные поля");
+          return;
+        }
+
+        // Here you would typically save the record to your database
+        // For demo purposes, we'll just add it to the UI
+        if (currentCategoryId) {
+          const tableBody = document.querySelector(
+            `#${currentCategoryId}-table tbody`
+          );
+          const recordId = "rec" + Math.floor(Math.random() * 1000);
+
+          const newRow = document.createElement("tr");
+          newRow.className = "border-b border-gray-200 hover:bg-gray-50";
+          newRow.id = recordId;
+
+          newRow.innerHTML = `
+                    <td class="py-3 px-4">${recordName}</td>
+                    <td class="py-3 px-4">${recordLink}</td>
+                    <td class="py-3 px-4">
+                        <div class="w-10 h-10 rounded" style="background-color: ${recordColor}"></div>
+                    </td>
+                    <td class="py-3 px-4">${
+                      recordType === "resource" ? "Ресурс" : "Кастомный"
+                    }</td>
+                    <td class="py-3 px-4">${
+                      recordType === "resource" ? resourceId : "-"
+                    }</td>
+                    <td class="py-3 px-4">${recordGroup}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="editRecord('${recordId}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteRecord('${recordId}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+
+          tableBody.appendChild(newRow);
+
+          // Open the table if it's not already open
+          const tableContainer = document.getElementById(
+            `${currentCategoryId}-table`
+          );
+          if (!tableContainer.classList.contains("open")) {
+            tableContainer.classList.add("open");
+          }
+
+          closeRecordModal();
+        }
+      }
+
+      // Edit functions
+      function editContext(contextId) {
+        // In a real application, you would fetch the context data and populate the form
+        openContextModal();
+        document.getElementById("contextName").value =
+          contextId.charAt(0).toUpperCase() + contextId.slice(1);
+      }
+
+      function editCategory(categoryId) {
+        // In a real application, you would fetch the category data and populate the form
+        openCategoryModal();
+        const categoryElement = document.querySelector(`#${categoryId}`);
+        if (categoryElement) {
+          const categoryName = categoryElement.querySelector("h4").textContent;
+          document.getElementById("categoryName").value = categoryName;
+        }
+      }
+
+      function editRecord(recordId) {
+        // In a real application, you would fetch the record data and populate the form
+        const recordElement = document.getElementById(recordId);
+        if (recordElement) {
+          const cells = recordElement.querySelectorAll("td");
+
+          // Find the category this record belongs to
+          const tableContainer = recordElement.closest(".table-container");
+          if (tableContainer) {
+            currentCategoryId = tableContainer.id.replace("-table", "");
+          }
+
+          openRecordModal(currentCategoryId);
+
+          document.getElementById("recordName").value = cells[0].textContent;
+          document.getElementById("recordLink").value = cells[1].textContent;
+
+          const colorDiv = cells[2].querySelector("div");
+          if (colorDiv) {
+            document.getElementById("recordImage").value = rgbToHex(
+              colorDiv.style.backgroundColor
+            );
+          }
+
+          const recordType =
+            cells[3].textContent === "Ресурс" ? "resource" : "custom";
+          document.getElementById("recordType").value = recordType;
+
+          if (recordType === "resource") {
+            document.getElementById("resourceId").value = cells[4].textContent;
+            document.getElementById("resourceIdContainer").style.display =
+              "block";
+          } else {
+            document.getElementById("resourceIdContainer").style.display =
+              "none";
+          }
+
+          document.getElementById("recordGroup").value = cells[5].textContent;
+        }
+      }
+
+      // Delete functions
+      function deleteContext(contextId) {
+        currentItemToDelete = contextId;
+        deleteType = "context";
+        document.getElementById(
+          "deleteItemName"
+        ).textContent = `контекст "${contextId}"`;
+        openDeleteModal();
+      }
+
+      function deleteCategory(categoryId) {
+        currentItemToDelete = categoryId;
+        deleteType = "category";
+        document.getElementById("deleteItemName").textContent = "категорию";
+        openDeleteModal();
+      }
+
+      function deleteRecord(recordId) {
+        currentItemToDelete = recordId;
+        deleteType = "record";
+        document.getElementById("deleteItemName").textContent = "запись";
+        openDeleteModal();
+      }
+
+      function openDeleteModal() {
+        document.getElementById("deleteModal").classList.remove("hidden");
+        document.getElementById("deleteModal").classList.add("flex");
+      }
+
+      function closeDeleteModal() {
+        document.getElementById("deleteModal").classList.add("hidden");
+        document.getElementById("deleteModal").classList.remove("flex");
+        currentItemToDelete = null;
+        deleteType = null;
+      }
+
+      function confirmDelete() {
+        if (!currentItemToDelete || !deleteType) {
+          closeDeleteModal();
+          return;
+        }
+
+        switch (deleteType) {
+          case "context":
+            // Find and remove the context
+            const contexts = document.querySelectorAll(".context-section");
+            contexts.forEach((context) => {
+              const contextTitle = context.querySelector("h3").textContent;
+              if (contextTitle.toLowerCase().includes(currentItemToDelete)) {
+                context.remove();
+              }
+            });
+            break;
+
+          case "category":
+            // Find and remove the category
+            const category = document.querySelector(
+              `.category-card:has(div[onclick*="${currentItemToDelete}"])`
+            );
+            if (category) {
+              category.remove();
+            }
+            break;
+
+          case "record":
+            // Find and remove the record
+            const record = document.getElementById(currentItemToDelete);
+            if (record) {
+              record.remove();
+            }
+            break;
+        }
+
+        closeDeleteModal();
+      }
+
+      // Helper function to convert RGB to HEX
+      function rgbToHex(rgb) {
+        if (!rgb) return "#000000";
+
+        // If rgb is already a hex value, return it
+        if (rgb.startsWith("#")) return rgb;
+
+        // Extract the r, g, b values
+        const rgbValues = rgb.match(/\d+/g);
+        if (!rgbValues || rgbValues.length < 3) return "#000000";
+
+        const r = parseInt(rgbValues[0]);
+        const g = parseInt(rgbValues[1]);
+        const b = parseInt(rgbValues[2]);
+
+        return (
+          "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+        );
+      }
+
+      // Initialize the page
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set up the search functionality
+        const searchInput = document.getElementById("search");
+        searchInput.addEventListener("input", function () {
+          const searchTerm = this.value.toLowerCase();
+
+          // Search in categories
+          const categories = document.querySelectorAll(".category-card");
+          categories.forEach((category) => {
+            const categoryName = category
+              .querySelector("h4")
+              .textContent.toLowerCase();
+            const categoryVisible = categoryName.includes(searchTerm);
+
+            // Search in records
+            const records = category.querySelectorAll("tbody tr");
+            let recordVisible = false;
+
+            records.forEach((record) => {
+              const cells = record.querySelectorAll("td");
+              let rowVisible = false;
+
+              cells.forEach((cell) => {
+                if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                  rowVisible = true;
+                }
+              });
+
+              record.style.display =
+                rowVisible || categoryVisible ? "" : "none";
+              if (rowVisible) recordVisible = true;
+            });
+
+            // Show category if either the category name matches or any record matches
+            category.style.display =
+              categoryVisible || recordVisible ? "" : "none";
+
+            // Open the table if there are matching records
+            if (recordVisible) {
+              const tableId = category.querySelector('[id$="-table"]').id;
+              document.getElementById(tableId).classList.add("open");
+            }
+          });
+
+          // Show/hide contexts based on whether they have visible categories
+          const contexts = document.querySelectorAll(".context-section");
+          contexts.forEach((context) => {
+            const categories = context.querySelectorAll(".category-card");
+            let hasVisibleCategory = false;
+
+            categories.forEach((category) => {
+              if (category.style.display !== "none") {
+                hasVisibleCategory = true;
+              }
+            });
+
+            context.style.display = hasVisibleCategory ? "" : "none";
+          });
+        });
+      });
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'94ae216f8544d17b',t:'MTc0OTExMDM2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+    <iframe
+      height="1"
+      width="1"
+      style="
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        border: none;
+        visibility: hidden;
+      "
+    ></iframe>
+  </body>
+</html>
