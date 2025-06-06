@@ -1,3 +1,4 @@
+import HelpModal from "../../components/help-modal/wrapper";
 import {ButtonIcon} from "./buttons";
 
 export default function Header() {
@@ -6,6 +7,9 @@ export default function Header() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Управление тегами</h1>
+
+          <HelpModal />
+
           {/* <div className="relative">
             <input
               type="text"
