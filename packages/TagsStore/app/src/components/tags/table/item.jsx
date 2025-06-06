@@ -28,7 +28,9 @@ export default function TagItem({item, handlerFetchTags, setTags}) {
       <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
         <td className="py-3 px-4">{item.title}</td>
         <td className="py-3 px-4">{item.uri}</td>
-        <td className="py-3 px-4">{item.image ?? <img src={item.image} />}</td>
+        <td className="py-3 px-4">
+          {item.image && <img src={item.image} width={40} height={40} />}
+        </td>
         <td className="py-3 px-4">{item.type}</td>
         <td className="py-3 px-4">{item.resource_id}</td>
         <td className="py-3 px-4">{item.group_name}</td>
