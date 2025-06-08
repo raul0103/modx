@@ -77,7 +77,7 @@ foreach ($tags as $tag) {
     if ($tag['type'] === "resource") {
         $resource = $resources_by_id[$tag['resource_id']];
 
-        $tag["title"] = $resource->get("menutitle") ?: $resource->get("pagetitle");
+        $tag["title"] = $tag['title'] ?: $resource->get("menutitle") ?: $resource->get("pagetitle");
         $tag["uri"] = $resource->get("uri");
         if ($resourceImageTVName) {
             $tag["image"] = $resource->getTVValue($resourceImageTVName);

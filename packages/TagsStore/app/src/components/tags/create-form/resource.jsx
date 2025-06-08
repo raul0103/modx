@@ -16,6 +16,7 @@ export default function CreateTagFormResource({
   const [formFields, setFormFields] = useState({
     type: tagType,
     tag_id: mode === "update" ? tag.id : "",
+    title: mode === "update" ? tag.title : "",
     group_name: mode === "update" ? tag.group_name : "",
     resource_id: mode === "update" ? tag.resource_id : null,
     category_id: mode === "update" ? tag.category_id : category_id,
@@ -39,6 +40,13 @@ export default function CreateTagFormResource({
     handlerActionTag(formFields);
   };
 
+  const handleSetFormFields = (e, field, value = null) => {
+    setFormFields({
+      ...formFields,
+      [field]: value ?? e.target.value,
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -47,24 +55,22 @@ export default function CreateTagFormResource({
         <Input
           label="Группа"
           value={formFields.group_name}
-          onChange={(e) =>
-            setFormFields({
-              ...formFields,
-              group_name: e.target.value,
-            })
-          }
+          onChange={(e) => handleSetFormFields(e, "group_name")}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <Input
+          label="Название"
+          value={formFields.title}
+          onChange={(e) => handleSetFormFields(e, "title")}
+          error={errors.title}
+        />
         <Input
           label="ID ресурса"
           type="number"
           value={formFields.resource_id ?? ""}
           onChange={(e) =>
-            setFormFields({
-              ...formFields,
-              resource_id: Number(e.target.value),
-            })
+            handleSetFormFields(e, "resource_id", Number(e.target.value))
           }
           error={errors.resource_id}
         />
