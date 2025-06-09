@@ -14,5 +14,6 @@
         "standart": "Московской области"
       }
     }
-  }
+  },
+  "address": "Адрес для города himki из файлы data/global/regions/moskva/himki.json"
 }
