@@ -65,7 +65,7 @@ cart.events.minishopCreateOrder(); // Создаст заказ в minishop2
   - Создаст необходимые настройки для работы
   - Можно создать вручню
 - Вызвать `{'@FILE modules/cart/backend/snippets/ajax.php' | snippet}` в начале страницы
-- В карточках товара вызывать `modules/cart/backend/frontend/cart-product-controls.tpl`
+- В карточках товара вызывать `{include "file:modules/cart/frontend/chunks/cart-controls-default.tpl"}`
 
 ## Опции необходимые для работы скрипта
 
