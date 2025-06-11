@@ -35,6 +35,7 @@
 ```js
 cart.events.clear(); // Полностью очистит корзину
 cart.events.remove(PRODUCT_ID); // Удалит товар из корзины
+cart.events.minishopCreateOrder(); // Создаст заказ в minishop2
 ```
 
 ## BACKEND
@@ -44,6 +45,17 @@ cart.events.remove(PRODUCT_ID); // Удалит товар из корзины
 - `backend/processors` - Основные процессоры для работы с изменением кол-ва товаров в корзине
 - `backend/snippets` - Сниппеты
 - `snippets/getProductData.php` - Отдает на страницу по PRODUCT_ID Данные по товару в корзине
+- `snippets/getProducts.php` - Отдает список товаров в корзине
+
+```php
+{set $products = "@FILE modules/cart/backend/snippets/getProducts.php" | snippet : [
+    'options' => [
+        'option-1' => 'razmer-mm',
+        'option-2' => 'obem-m3',
+    ]
+]}
+```
+
 - `snippets/getCartTotal.php` - Отдает на страницу общее кол-во позиций в корзине и общую сумму
 
 ## Установка
@@ -64,3 +76,7 @@ cart.events.remove(PRODUCT_ID); // Удалит товар из корзины
 ## Зависмости
 
 - Модуль notifications js/modules/notifications.js. Подключается в frontend/js/services/notification-service.js
+
+## Обновления
+
+- Добавли функционал для работы с корзиной минишопа `core\elements\modules\cart\backend\processors\minishoporder.class.php`

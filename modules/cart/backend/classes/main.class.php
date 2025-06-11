@@ -76,7 +76,7 @@ class Main
      * Отдает массив товаров в корзине
      * @return array $products
      */
-    public function getProducts()
+    public function getProducts($options = null)
     {
         global $modx;
 
@@ -104,7 +104,7 @@ class Main
 
             $summ = $this->calcSumm($cart_item['count'], $cart_item['price']);
 
-            $output[] = [
+            $fields = [
                 "id" => $product_id,
                 "pagetitle" => $ms_product->get("pagetitle"),
                 "menutitle" => $ms_product->get("menutitle"),
@@ -114,8 +114,16 @@ class Main
                 "price" => $cart_item['price'] ?: $ms_product->get("price"), // Получаем из корзины, вдруг была подмена 
                 "old_price" => $cart_item['old_price'] ?: $ms_product->get("old_price"),
                 "count" =>  $cart_item['count'],
-                "summ" => $summ
+                "summ" => $summ,
             ];
+
+            if ($options) {
+                foreach ($options as $key => $option_key) {
+                    $fields[$key] = $ms_product->get($option_key)[0];
+                }
+            }
+
+            $output[] = $fields;
         }
 
         return $output;

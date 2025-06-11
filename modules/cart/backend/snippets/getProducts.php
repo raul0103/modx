@@ -10,6 +10,6 @@ if (!class_exists("Main")) {
 
 $main_cart_class = new Main();
 
-$products = $main_cart_class->getProducts();
+$products = $main_cart_class->getProducts($options);
 
 return $products;
