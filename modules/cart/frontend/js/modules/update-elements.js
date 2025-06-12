@@ -44,11 +44,11 @@ const update_elements = {
       element[field] = value;
 
       // Если true то добавит класс hidden если значение 0
-      if (element.dataset.cartTotalHideEmpty == "true") {
+      if (element.dataset.totalHideEmpty == "true") {
         if (value < 1) {
-          element.style.display = "none";
+          element.classList.add("hidden");
         } else {
-          element.style.display = "block";
+          element.classList.remove("hidden");
         }
       }
     });
