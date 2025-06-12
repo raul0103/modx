@@ -1,6 +1,6 @@
 /**
  * Скрипт управляет кнопками для добавления в избранное
- * Создаст глобальную функцию window.addProductSelection, указать ее на кнопке onclick="addProductSelection(this,resource_id)", так как товары будут подгружать по ajax
+ * Создаст глобальную функцию window.addProductSelection и window.deleteProductSelection, указать ее на кнопке onclick="addProductSelection(this,resource_id)", так как товары будут подгружать по ajax
  *
  * Аттрибуты необходимые для работы
  * data-selection-key="cookie_key" - Кол-во сохраненных товаров , можно установить на несколько элементов
@@ -14,6 +14,7 @@ class ProductSelection {
 
   init() {
     window.addProductSelection = this.addProductSelection;
+    window.deleteProductSelection = this.deleteProductSelection;
   }
 
   /**
@@ -58,6 +59,16 @@ class ProductSelection {
 
     this.updateCounts(cookie_key, ids.length);
   };
+
+  /**
+   *
+   * @param {string} cookie_key
+   */
+  deleteProductSelection = (cookie_key) => {
+    this.cookie.delete(cookie_key);
+    location.reload();
+  };
+
   /**
    *
    * @param {string} cookie_key - Ключ для куки куда будет сохранен результат
@@ -79,8 +90,16 @@ class ProductSelection {
       this.find_elements.counters[cookie_key] = counter_elements;
     }
 
-    counter_elements.forEach((counter_element) => {
+    this.find_elements.counters[cookie_key].forEach((counter_element) => {
       counter_element.textContent = count;
+
+      if (counter_element.dataset.totalHideEmpty == "true") {
+        if (count < 1) {
+          counter_element.classList.add("hidden");
+        } else {
+          counter_element.classList.remove("hidden");
+        }
+      }
     });
   }
 }

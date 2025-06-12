@@ -1,4 +1,10 @@
 - Вызвать в начале страницы сниппет setPlaceholder.php, для записи массива ID товаров
+
+```php
+{'@FILE modules/store-product-selection/snippet/setPlaceholder.php' | snippet : ["cookie_key" => "favorite-products"]}
+{'@FILE modules/store-product-selection/snippet/setPlaceholder.php' | snippet : ["cookie_key" => "comparison-products"]}
+```
+
 - Обязательно передать в сниппет cookie_key. По нему можно сохранять ID для любых целей
 - В дальнешем можно проверкой ID в массиве манипулировать ресурсами
 
