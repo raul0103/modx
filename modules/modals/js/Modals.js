@@ -41,6 +41,8 @@ export default class Modals {
       }
     },
     close: (modal, close_callback) => {
+      this.current_opened = null;
+
       let modal_close_btns = modal.querySelectorAll(this.selectors.close);
       modal_close_btns.forEach((modal_close_btn) => {
         modal_close_btn.addEventListener("click", () => {
