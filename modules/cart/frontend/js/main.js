@@ -68,7 +68,7 @@ class Cart {
     remove: async (product_id) => {
       let action = "remove";
 
-      let response = await api.response(action, { id: product_id });
+      let response = await api.response(action, {id: product_id});
       if (!response && !response?.success) return;
 
       // Уведомление
@@ -76,6 +76,9 @@ class Cart {
 
       update_elements.cartTotalSumm(response.data);
       update_elements.cartTotalCount(response.data);
+    },
+    minishopCreateOrder: async (product_data) => {
+      await api.response("minishoporder", product_data);
     },
   };
 
