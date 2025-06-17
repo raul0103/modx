@@ -43,10 +43,10 @@ function copyDirectory($source, $destination)
 // Задаем пути к директориям
 $currentDir = dirname(__FILE__);  // Текущая директория
 $source1 = $currentDir . '/assets/components/'; // Путь к исходной директории 1
-$destination1 = 'C:/OSPanel/home/horton-v2/assets/components'; // Путь к целевой директории 1
+$destination1 = 'C:/OSPanel/home/digital-besedka/assets/components'; // Путь к целевой директории 1
 
 $source2 = $currentDir . '/core/components/'; // Путь к исходной директории 2
-$destination2 = 'C:/OSPanel/home/horton-v2/core/components'; // Путь к целевой директории 2
+$destination2 = 'C:/OSPanel/home/digital-besedka/core/components'; // Путь к целевой директории 2
 
 // Копируем директории
 if (copyDirectory($source1, $destination1)) {

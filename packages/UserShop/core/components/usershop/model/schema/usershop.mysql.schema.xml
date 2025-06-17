@@ -50,4 +50,32 @@
         <!-- Связи -->
         <aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign"/>
     </object>
+
+    <!-- Отзывы на товары -->
+    <object class="UserProductReviews" table="us_product_reviews" extends="xPDOSimpleObject">
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="product_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+
+        <field key="defects" dbtype="text" phptype="string" null="true" />
+        <field key="advantages" dbtype="text" phptype="string" null="true" />
+        <field key="content" dbtype="text" phptype="string" null="false" />
+
+        <field key="rating" dbtype="tinyint" precision="1" attributes="unsigned" null="false" default="5" />
+
+        <field key="publishedon" dbtype="datetime" null="true"/>
+        <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>
+        <field key="admin_response" dbtype="text" phptype="string" null="true"/>
+
+        <!-- Индексы -->
+        <index alias="user_id" name="user_id" type="BTREE">
+            <column key="user_id"/>
+        </index>
+        <index alias="product_id" name="product_id" type="BTREE">
+            <column key="product_id"/>
+        </index>
+
+        <!-- Связи -->
+        <aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign"/>
+        <aggregate alias="Product" class="modResource" local="product_id" foreign="id" cardinality="one" owner="foreign"/>
+    </object>
 </model>

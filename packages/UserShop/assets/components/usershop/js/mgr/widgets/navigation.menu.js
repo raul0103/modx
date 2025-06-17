@@ -26,6 +26,14 @@ UserShop.widget.NavigationMenu = function (config) {
           },
           {
             xtype: "button",
+            cls: getActiveClass("product-reviews"),
+            text: "Отзывы на товары",
+            handler: () =>
+              (window.location.href =
+                "index.php?a=product-reviews&namespace=usershop"),
+          },
+          {
+            xtype: "button",
             cls: getActiveClass("discount"),
             text: "Персональные скидки",
             handler: () =>
@@ -50,11 +58,10 @@ Ext.extend(UserShop.widget.NavigationMenu, MODx.Panel);
 
 // Функция для получения активного класса
 let getActiveClass = function (page) {
-  // Получаем текущий URL
-  const currentUrl = window.location.href;
+  const sp = new URLSearchParams(window.location.search);
 
   // Проверяем, содержит ли URL нужную страницу
-  if (currentUrl.indexOf(page) !== -1) {
+  if (sp.get("a") === page) {
     return "usershop-nav-link active"; // Если страница активна, добавляем класс "active"
   }
 

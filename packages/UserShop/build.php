@@ -21,5 +21,6 @@ $manager = $modx->getManager();
 $manager->createObjectContainer('OrderReviews');
 $manager->createObjectContainer('UserDiscount');
 $manager->createObjectContainer('UserTickets');
+$manager->createObjectContainer('UserProductReviews');
 
 echo 'Модель сгенерирована';
