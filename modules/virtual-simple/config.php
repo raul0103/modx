@@ -5,9 +5,8 @@ $config = [];
 // Определени домена/поддомена
 $host_explode = explode('.', $_SERVER['HTTP_HOST']);
 $config['host_explode'] = $host_explode;
-$subdomain = $host_explode[0];
+$subdomain = idn_to_utf8($host_explode[0], 0, INTL_IDNA_VARIANT_UTS46);
 $config['subdomain'] = $subdomain;
-
 
 /**
  * Формируем массив доменов и их контекста
