@@ -69,18 +69,21 @@ switch ($data['action']) {
         }
 
     case 'add-product-reviews':
-        if (strlen($data['content']) < 4) exit(json_encode([
-            "success" => false,
-            "message" => "Введите больше символов"
-        ]));
-        if (empty($data['rating']) || !in_array((int)$data['rating'], [1, 2, 3, 4, 5])) exit(json_encode([
-            "success" => false,
-            "message" => "Укажите рейтинг"
-        ]));
-        if (empty($data['product_id'])) exit(json_encode([
-            "success" => false,
-            "message" => "Укажите product_id"
-        ]));
+        $errors = [];
+        if (strlen($data['content']) < 6)
+            $errors["content"] = "Введите больше символов";
+        if (empty($data['rating']) || !in_array((int)$data['rating'], [1, 2, 3, 4, 5]))
+            $errors["rating"] = "Укажите рейтинг";
+        if (empty($data['product_id']))
+            $errors["product_id"] = "Укажите product_id";
+
+        if (count($errors) > 0) {
+            exit(json_encode([
+                "success" => false,
+                "message" => "В форме содержатся ошибки",
+                "errors" => $errors
+            ]));
+        }
 
         $modx->addPackage('usershop', $modx->getOption('core_path') . 'components/usershop/model/');
 

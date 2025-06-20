@@ -1,0 +1,28 @@
+.rating {
+  display: flex;
+  gap: 3px;
+  width: max-content;
+  justify-content: flex-end;
+  font-size: 24px;
+
+  &.clicable {
+    flex-direction: row-reverse; /* важно для правильной подсветки */
+    .star {
+      cursor: pointer;
+      /* Подсветка звезд при наведении */
+      &:hover,
+      &:hover ~ .star {
+        color: #f5a623;
+      }
+    }
+  }
+
+  .star {
+    line-height: 1;
+    color: #ccc;
+    transition: color 0.3s ease;
+    &.active {
+      color: #f5a623; /* Цвет активных звезд */
+    }
+  }
+}

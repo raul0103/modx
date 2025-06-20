@@ -73,11 +73,39 @@ export default function initAjax() {
   };
 
   window.addProductReviews = async (event) => {
+    const handlerError = {
+      showErrors: (form, errors) => {
+        Object.keys(errors).forEach((field) => {
+          const elem = form.querySelector(`[data-error-field="${field}"]`);
+          elem.style.display = "block";
+          elem.textContent = errors[field];
+        });
+      },
+      clearErrors: (form) => {
+        const elems = form.querySelectorAll("[data-error-field]");
+        elems.forEach((elem) => {
+          elem.style.display = "none";
+          elem.textContent = "";
+        });
+      },
+    };
+
+    const handlerFields = {
+      getRatingValue: (form) => {
+        const rating_stars = form.querySelectorAll("[data-rating-star].active");
+        return rating_stars.length;
+      },
+      clearFields: (form) => {
+        form.defects.value = null;
+        form.advantages.value = null;
+        form.content.value = null;
+      },
+    };
+
     event.preventDefault();
-
     let form = event.target;
-    form.classList.add("loading");
 
+    form.classList.add("loading");
     const response = await fetch("/", {
       method: "POST",
       headers: {
@@ -90,27 +118,21 @@ export default function initAjax() {
         defects: form.defects.value,
         advantages: form.advantages.value,
         content: form.content.value,
-        rating: form.rating.value,
+        rating: handlerFields.getRatingValue(form),
       }),
     });
-
     form.classList.remove("loading");
 
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Response status: ${response.status}`);
 
     let data = await response.json();
-
     if (data.success) {
       notifications.success(data.message);
-
-      form.defects.value = null;
-      form.advantages.value = null;
-      form.content.value = null;
-      form.rating.value = null;
+      handlerFields.clearFields(form);
+      handlerError.clearErrors(form);
     } else {
       notifications.error(data.message);
+      handlerError.showErrors(form, data.errors);
     }
   };
 }
