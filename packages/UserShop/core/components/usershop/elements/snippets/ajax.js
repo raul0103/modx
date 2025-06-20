@@ -77,8 +77,10 @@ export default function initAjax() {
       showErrors: (form, errors) => {
         Object.keys(errors).forEach((field) => {
           const elem = form.querySelector(`[data-error-field="${field}"]`);
-          elem.style.display = "block";
-          elem.textContent = errors[field];
+          if (elem) {
+            elem.style.display = "block";
+            elem.textContent = errors[field];
+          }
         });
       },
       clearErrors: (form) => {
