@@ -5,7 +5,7 @@ UserShop.grid.OrderReviews = function (config) {
   Ext.applyIf(config, {
     id: "usershop-grid-reviews",
     url: UserShop.config.connector_url,
-    baseParams: { action: "mgr/reviews/getlist" },
+    baseParams: { action: "mgr/order-reviews/getlist" },
     fields: [
       "id",
       "user_id",
@@ -161,7 +161,7 @@ UserShop.grid.OrderReviews.prototype.updateRecord = function (record) {
           Ext.Ajax.request({
             url: UserShop.config.connector_url,
             params: {
-              action: "mgr/reviews/update",
+              action: "mgr/order-reviews/update",
               id: record.get("id"),
               admin_response: values.admin_response,
               status: values.status,
@@ -204,7 +204,7 @@ const deleteRecord = function (record) {
         Ext.Ajax.request({
           url: UserShop.config.connector_url,
           params: {
-            action: "mgr/reviews/remove",
+            action: "mgr/order-reviews/remove",
             id: record.get("id"),
           },
           success: function (response) {

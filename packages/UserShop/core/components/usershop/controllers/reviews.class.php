@@ -16,9 +16,9 @@ class UserShopReviewsManagerController extends modExtraManagerController
 
         $this->addJavascript($assetsUrl . 'js/mgr/widgets/navigation.menu.js');
 
-        $this->addJavascript($assetsUrl . 'js/mgr/widgets/reviews/reviews.grid.js');
-        $this->addJavascript($assetsUrl . 'js/mgr/widgets/reviews/reviews.panel.js');
-        $this->addJavascript($assetsUrl . 'js/mgr/pages/reviews.js');
+        $this->addJavascript($assetsUrl . 'js/mgr/widgets/order-reviews/reviews.grid.js');
+        $this->addJavascript($assetsUrl . 'js/mgr/widgets/order-reviews/reviews.panel.js');
+        $this->addJavascript($assetsUrl . 'js/mgr/pages/order-reviews.js');
 
         $this->addHtml('<script type="text/javascript">
             Ext.onReady(function() {
