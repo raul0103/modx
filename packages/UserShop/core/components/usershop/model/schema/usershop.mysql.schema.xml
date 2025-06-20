@@ -4,6 +4,8 @@
         <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
         <field key="order_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
         <field key="content" dbtype="text" phptype="string" null="false" />
+
+        <field key="created_at" dbtype="datetime" phptype="datetime" null="true"/>
         <field key="publishedon" dbtype="datetime" null="true"/>
         <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>
         <field key="admin_response" dbtype="text" phptype="string" null="true"/>
@@ -38,7 +40,10 @@
         <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
         <field key="subject" dbtype="text" phptype="string" null="false" />
         <field key="content" dbtype="text" phptype="string" null="false" />
+
+        <field key="created_at" dbtype="datetime" phptype="datetime" null="true"/>
         <field key="publishedon" dbtype="datetime" null="true"/>
+
         <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>
         <field key="admin_response" dbtype="text" phptype="string" null="true"/>
 
@@ -53,8 +58,10 @@
 
     <!-- Отзывы на товары -->
     <object class="UserProductReviews" table="us_product_reviews" extends="xPDOSimpleObject">
-        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+        <field key="user_id" dbtype="int" precision="10" attributes="unsigned" null="true" default="0"/>
         <field key="product_id" dbtype="int" precision="10" attributes="unsigned" null="false" default="0"/>
+
+        <field key="author" dbtype="text" phptype="string" null="true" />
 
         <field key="defects" dbtype="text" phptype="string" null="true" />
         <field key="advantages" dbtype="text" phptype="string" null="true" />
@@ -62,7 +69,9 @@
 
         <field key="rating" dbtype="tinyint" precision="1" attributes="unsigned" null="false" default="5" />
 
+        <field key="created_at" dbtype="datetime" phptype="datetime" null="true"/>
         <field key="publishedon" dbtype="datetime" null="true"/>
+
         <field key="status" dbtype="varchar" phptype="string" precision="20" null="false" default="pending"/>
         <field key="admin_response" dbtype="text" phptype="string" null="true"/>
 

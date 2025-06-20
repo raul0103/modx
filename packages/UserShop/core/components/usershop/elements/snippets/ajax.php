@@ -26,6 +26,7 @@ switch ($data['action']) {
             "user_id" => $modx->user->id,
             "order_id" => $data['order_id'],
             "content" => $data['content'],
+            "created_at" => date('Y-m-d H:i:s')
         ]);
 
         if ($new_review->save()) {
@@ -52,6 +53,7 @@ switch ($data['action']) {
             "user_id" => $modx->user->id,
             "subject" => $data['subject'],
             "content" => $data['content'],
+            "created_at" => date('Y-m-d H:i:s')
         ]);
 
         if ($new_review->save()) {
@@ -82,8 +84,7 @@ switch ($data['action']) {
 
         $modx->addPackage('usershop', $modx->getOption('core_path') . 'components/usershop/model/');
 
-        $new_review = $modx->newObject('UserProductReviews', [
-            "user_id" => $modx->user->id,
+        $params = [
             "product_id" => $data['product_id'],
 
             "defects" => $data['defects'],
@@ -91,7 +92,17 @@ switch ($data['action']) {
             "content" => $data['content'],
 
             "rating" => $data['rating'],
-        ]);
+            "created_at" => date('Y-m-d H:i:s')
+        ];
+
+        if ($modx->user->id) {
+            $profile = $modx->user->getOne('Profile');
+
+            $params["user_id"] = $modx->user->id;
+            $params["author"] = $profile->fullname;
+        }
+
+        $new_review = $modx->newObject('UserProductReviews', $params);
 
         if ($new_review->save()) {
             exit(json_encode([

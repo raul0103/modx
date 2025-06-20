@@ -10,7 +10,9 @@ UserShop.grid.ProductReviews = function (config) {
       "id",
       "user_id",
       "username",
+
       "product_id",
+      "product_pagetitle",
 
       "defects",
       "advantages",
@@ -41,10 +43,12 @@ UserShop.grid.ProductReviews = function (config) {
         renderer: function (value, metaData, record) {
           const product_id = record.get("product_id");
           const url = `${MODx.config.manager_url}?a=resource/update&id=${product_id}`;
-          return `<a href="${url}" target="_blank">${value}</a>`;
+          return `<a href="${url}" target="_blank">${record.get(
+            "product_pagetitle"
+          )}</a>`;
         },
       },
-      {header: "Рейтинг", dataIndex: "rating", width: 100},
+      {header: "Рейтинг", dataIndex: "rating", width: 100, sortable: true},
 
       {header: "Недостатки", dataIndex: "defects", width: 200},
       {header: "Достоинства", dataIndex: "advantages", width: 200},

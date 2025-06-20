@@ -22,7 +22,7 @@ class OrderReviewGetListProcessor extends modObjectGetListProcessor
         $c->select(['username' => 'User.username']);
 
         $c->leftJoin('modResource', 'Product', 'Product.id = UserProductReviews.product_id');
-        $c->select(['product_id' => 'Product.id']);
+        $c->select(['product_id' => 'Product.id', 'product_pagetitle' => 'Product.pagetitle']);
 
         return $c;
     }
