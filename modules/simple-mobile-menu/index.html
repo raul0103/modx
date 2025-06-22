@@ -1,0 +1,127 @@
+<div class="catalog-mobile" data-mc>
+  <ul class="catalog-mobile__list">
+    <li class="catalog-mobile__list-item dropdown">
+      <a href="oborudovanie/">Оборудование</a>
+      <span class="catalog-mobile__next-btn" data-mc-next></span>
+      <ul class="catalog-mobile__submenu" data-mc-submenu>
+        <li class="catalog-mobile__list-item" data-mc-back>Назад</li>
+        <li class="catalog-mobile__list-item">
+          <a href="samovaryi/">Самовары</a>
+        </li>
+        <li class="catalog-mobile__list-item"><a href="kazanyi/">Казаны</a></li>
+      </ul>
+    </li>
+    <li class="catalog-mobile__list-item dropdown">
+      <a href="vse-dlya-pipovara/">Все для пиповара</a>
+      <span class="catalog-mobile__next-btn" data-mc-next></span>
+      <ul class="catalog-mobile__submenu" data-mc-submenu>
+        <li class="catalog-mobile__list-item" data-mc-back>Назад</li>
+        <li class="catalog-mobile__list-item">
+          <a href="pivnyie-drozhzhi/">Пивные дрожжи</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<script>
+  function mobileCatalog() {
+    const opened_btns = document.querySelectorAll("[data-mc-opened]");
+    const mobile_catalog = document.querySelector("[data-mc]");
+    if (!mobile_catalog) return;
+
+    opened_btns.forEach((opened_btn) => {
+      opened_btn.addEventListener("click", () => {
+        opened_btn.classList.toggle("active");
+        mobile_catalog.classList.toggle("opened");
+
+        if (!mobile_catalog.classList.contains("opened")) {
+          const opened_submenu = mobile_catalog.querySelectorAll(
+            "[data-mc-submenu].opened"
+          );
+          opened_submenu.forEach((submenu) => {
+            submenu.classList.remove("opened");
+          });
+        }
+      });
+    });
+
+    const next_btns = mobile_catalog.querySelectorAll("[data-mc-next]");
+    next_btns.forEach((next_btn) => {
+      next_btn.addEventListener("click", () => {
+        const next = next_btn.nextElementSibling;
+        if (next && next.matches("[data-mc-submenu]")) {
+          next.classList.add("opened");
+        } else {
+          console.warn("Не найден data-mc-submenu");
+        }
+      });
+    });
+
+    const back_btns = mobile_catalog.querySelectorAll("[data-mc-back]");
+    back_btns.forEach((back_btn) => {
+      back_btn.addEventListener("click", () => {
+        const parent = back_btn.parentNode;
+        if (parent && parent.matches("[data-mc-submenu]")) {
+          parent.classList.remove("opened");
+        } else {
+          console.warn("Не найден data-mc-submenu");
+        }
+      });
+    });
+  }
+  mobileCatalog();
+</script>
+
+<style lang="scss">
+  .catalog-mobile {
+    position: fixed;
+    left: -100%;
+    top: 117px;
+
+    width: 100%;
+    height: 100vh;
+
+    background: #fff;
+    z-index: 999;
+
+    opacity: 0;
+    padding: 40px;
+    transition: 0.3s;
+
+    &.opened {
+      left: 0;
+      opacity: 1;
+    }
+    &__submenu {
+      position: fixed;
+      left: -100%;
+      top: 117px;
+
+      width: 100%;
+      height: 100vh;
+
+      background: #fff;
+      z-index: 999;
+
+      opacity: 0;
+      padding: 40px;
+      transition: 0.3s;
+      &.opened {
+        left: 0;
+        opacity: 1;
+      }
+    }
+    &__list {
+      &-item {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+    &__next-btn {
+      width: 20px;
+      height: 20px;
+      background: url("/assets/template/images/arrow.svg") no-repeat center;
+    }
+  }
+</style>
