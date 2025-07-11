@@ -48,7 +48,7 @@ function download_image($url, $save_path)
 }
 
 // Открытие CSV
-$csvFile = MODX_BASE_PATH . '/_import-images/test.csv';
+$csvFile = MODX_BASE_PATH . '/_import-images/images.csv';
 $handle = fopen($csvFile, 'r');
 if ($handle === false) {
     die("Ошибка открытия файла $csvFile");
