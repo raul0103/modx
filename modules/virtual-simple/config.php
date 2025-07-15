@@ -2,87 +2,70 @@
 
 $config = [];
 
-// Определени домена/поддомена
+// Определение домена/поддомена
 $host_explode = explode('.', $_SERVER['HTTP_HOST']);
 $config['host_explode'] = $host_explode;
 $subdomain = idn_to_utf8($host_explode[0], 0, INTL_IDNA_VARIANT_UTS46);
 $config['subdomain'] = $subdomain;
 
-/**
- * Формируем массив доменов и их контекста
- * Получаем список контекстов по папкам в ./json
- * 
- * $contexts = [
- *  'domain' => 'web',
- *  'domain' => 'spb'
- * ]
- * 
- * >>>
- */
-// $base_directory = __DIR__ . "/json";
-// $contexts = [];
-
-// $subdirectories = array_filter(scandir($base_directory), function ($dir) use ($base_directory) {
-//     return is_dir($base_directory . DIRECTORY_SEPARATOR . $dir) && !in_array($dir, ['.', '..']);
-// });
-
-// foreach ($subdirectories as $subdir) {
-//     $path = $base_directory . DIRECTORY_SEPARATOR . $subdir;
-
-//     // Получаем только файлы внутри текущей поддиректории
-//     $files = array_filter(scandir($path), function ($file) use ($path) {
-//         return is_file($path . DIRECTORY_SEPARATOR . $file);
-//     });
-
-//     foreach ($files as $file) {
-//         $filename = str_replace('.json', '', $file);
-//         $contexts[$filename] = $subdir;
-//     }
-// }
-// <<<
-
-
-
-
-// >>> Ищем файл по поддомену и к какому контексту он относится
 $base_directory = __DIR__ . "/json";
-
 $target_file = "$subdomain.json";
 $found_context = null;
 
-// Получаем список поддиректорий
+// Получаем список поддиректорий (контекстов)
 $subdirectories = array_filter(scandir($base_directory), function ($dir) use ($base_directory) {
     return is_dir($base_directory . DIRECTORY_SEPARATOR . $dir) && !in_array($dir, ['.', '..']);
 });
 
-// Ищем файл в каждой поддиректории
+// Ищем файл поддомена
 foreach ($subdirectories as $subdir) {
     $path = $base_directory . DIRECTORY_SEPARATOR . $subdir;
 
-    // Проверяем, существует ли файл в этой поддиректории
     if (file_exists($path . DIRECTORY_SEPARATOR . $target_file)) {
         $found_context = $subdir;
         break;
     }
 }
 
-// if ($found_context !== null) {
-//     echo "Файл '$target_file' находится в папке: $found_context" . PHP_EOL;
-// } else {
-//     echo "Файл '$target_file' не найден в поддиректориях." . PHP_EOL;
-// }
-// <<<
+// >>> Если не найден — ищем по настройкам MODX контекстов
+if ($found_context === null && isset($modx)) {
+    // Получаем все контексты
+    $contexts = $modx->getCollection('modContext');
 
-// >>> Подключаем контекст в modx
+    $current_host = $_SERVER['HTTP_HOST'];
+
+    /** @var modContext $context */
+    foreach ($contexts as $context) {
+        $ctxKey = $context->get('key');
+
+        // Пропускаем системные контексты
+        if (in_array($ctxKey, ['mgr'])) {
+            continue;
+        }
+
+        // Получаем настройки контекста
+        $settings = $context->getMany('ContextSettings');
+
+        foreach ($settings as $setting) {
+            if ($setting->get('key') === 'http_host') {
+                $contextHost = $setting->get('value');
+
+                if (strcasecmp($contextHost, $current_host) === 0) {
+                    $found_context = $ctxKey;
+                    break 2;
+                }
+            }
+        }
+    }
+}
+
+// >>> Переключаем контекст
 if ($found_context !== null) {
     $config['context_key'] = $found_context;
-    // подмена контекста в соответсвии с доменом/поддоменом
-    $modx->switchContext($config['context_key']);
+    $modx->switchContext($found_context);
 } else {
-    // $config['context_key'] = $modx->context->key;
     header("HTTP/1.1 400 Bad Request");
     exit;
 }
-// <<<
 
 return $config;
