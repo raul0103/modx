@@ -74,6 +74,7 @@ try {
 ```
 
 2. Выводим в чанке
+
 ```php
 {if $rules = "@FILE _modules/category-product-rules/snippets/getRules.php" | snippet}
   <div>
@@ -87,6 +88,7 @@ try {
     ]}
   </div>
 {/if}
+```
 
 ---
 
