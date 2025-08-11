@@ -23,14 +23,21 @@ components/
 2. Создайте записи в "Пространство имен"
 
 ```code
+Название
+TagsStore
+
+Путь к ядру
 {core_path}components/TagsStore/
+
+Путь к активам
 {assets_path}components/TagsStore/
 ```
 
 3. Проверить что в action.php `const PRODUCTION = true;`
-<!-- 4. Пробежать по файлам и заменить TagsStore на название своего пакета -->
-4. С app/ запустить `npm run build`
+4. С app/ запустить `npm run build` - Все необходимые файлы попадут в assets/components/TagsStore
 5. Запустить миграции `database/migrations/table_name.php` (Пока через консоль. Не придумал как упростить установку)
+
+Если будут ошибки проверь app/.env.production
 
 ---
 
