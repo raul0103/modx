@@ -112,7 +112,8 @@ class QC
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             $response = curl_exec($curl);
             if ($response === false) {
-                $error = curl_error($curl);
+                // $error = curl_error($curl);
+                $error = "";
                 $record->set('log', "Ошибка отправки сообщения: $error");
                 $record->save();
             } else {
@@ -123,6 +124,51 @@ class QC
             // <<<
         }
     }
+
+    /** Без ожидания ответа сервера */
+    // public function callback()
+    // {
+    //     // Получаем неотправленные записи
+    //     $records = $this->modx->getCollection('QueueCallback', ['sent' => 0, 'log' => null]);
+
+    //     foreach ($records as $record) {
+    //         // >>> Проверка задержки перед отправкой
+    //         $date = strtotime($record->get('date'));
+    //         $now = time();
+    //         if (($now - $date) < $this->callback_delay) continue;
+    //         // <<<
+
+    //         $data = $record->get('data');
+    //         $data = json_decode($data, true);
+    //         $data = http_build_query($data);
+
+    //         // >>> Fire-and-forget запрос
+    //         $url = "{$record->url}?$data";
+    //         $parts = parse_url($url);
+
+    //         $host = $parts['host'];
+    //         $port = isset($parts['port']) ? $parts['port'] : 80;
+    //         $path = isset($parts['path']) ? $parts['path'] : '/';
+    //         $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+
+    //         $fp = @fsockopen($host, $port, $errno, $errstr, 1);
+    //         if ($fp) {
+    //             stream_set_timeout($fp, 1); // максимум 1 секунда
+    //             $out = "GET " . $path . $query . " HTTP/1.1\r\n";
+    //             $out .= "Host: " . $host . "\r\n";
+    //             $out .= "Connection: Close\r\n\r\n";
+    //             fwrite($fp, $out);
+    //             fclose($fp);
+
+    //             // Считаем, что запрос ушёл успешно
+    //             $record->set('sent', 1);
+    //         } else {
+    //             $record->set('log', "Ошибка отправки сообщения: $errstr ($errno)");
+    //         }
+    //         $record->save();
+    //         // <<<
+    //     }
+    // }
 
     // Объединение глубокого массива
     public function deepMerge(array &$original, array $updates)
