@@ -92,7 +92,7 @@ class QC
     public function callback()
     {
         // Получаем неотправленные записи
-        $records = $this->modx->getCollection('QueueCallback', ['sent' => 0]);
+        $records = $this->modx->getCollection('QueueCallback', ['sent' => 0, 'log' => null]);
 
         foreach ($records as $record) {
             // >>> Пора ли отправляеть сообщение
@@ -113,7 +113,7 @@ class QC
             $response = curl_exec($curl);
             if ($response === false) {
                 $error = curl_error($curl);
-                $record->set('message', "Ошибка отправки сообщения: $error");
+                $record->set('log', "Ошибка отправки сообщения: $error");
                 $record->save();
             } else {
                 $record->set('sent', 1);
