@@ -1,7 +1,5 @@
 {
-  "contacts": {
-    "phone": "8 (999) 999-99-99",
-    "email": "mltyandex@mail.ru",
-    "source": "mltyandex-source"
-  }
+  "phone": "8 (999) 999-99-99",
+  "email": "mltyandex@mail.ru",
+  "source": "mltyandex-source"
 }

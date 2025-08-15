@@ -73,10 +73,13 @@ if (!class_exists('GlobalProvider')) {
             global $modx;
 
             $result = [];
-            foreach ($modified_global_data ?: $this->global_data as $data) {
-                $result = array_replace_recursive($result, $data);
+            foreach ($modified_global_data ?: $this->global_data as $key => $data) {
+                if (is_array($data)) {
+                    $result = array_replace_recursive($result, $data);
+                } else {
+                    $result[$key] = $data;
+                }
             }
-
             $modx->setPlaceholder($this->global_data_placeholder_key, $result);
         }
 
