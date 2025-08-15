@@ -21,6 +21,9 @@ if (!class_exists('VirtualRouter')) {
 
         public function __construct()
         {
+            global $modx;
+            session_start();
+
             $this->initConfig();
             $this->includeComponents();
 
@@ -42,9 +45,11 @@ if (!class_exists('VirtualRouter')) {
             // 5. Записываем данные в placeholder
             $this->GlobalProvider->setDataToPlaceholder($modified_global_data);
 
+            // 6. Сохраним в сессию для получения данных в плагинах
+            $_SESSION["virtual-router"] = $modx->getPlaceholder("virtual-router");
+
             // Вывод данных в JSON
             if ($_GET['virtual-router-debug']) {
-                global $modx;
                 header('Content-Type: application/json; charset=utf-8');
                 exit(json_encode($modx->getPlaceholder("virtual-router"), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
             }
