@@ -21,7 +21,7 @@ if (!class_exists('UTMProvider')) {
             }
 
             $utm_source = $_GET['utm_source'] ?: $_SESSION['utm_source'];
-            $utm_file = __DIR__ . "/data/utm/$utm_source.json";
+            $utm_file = dirname(dirname(__DIR__)) . "/data/utm/$utm_source.json";
 
             $utm_data = null;
             if ($utm_source && file_exists($utm_file)) {

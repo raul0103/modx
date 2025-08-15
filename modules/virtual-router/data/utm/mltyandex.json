@@ -1,5 +1,7 @@
 {
-  "phone": "8 (777) 777-77-77",
-  "email": "mltyandex@mail.ru",
-  "source": "mltyandex-source"
+  "contacts": {
+    "phone": "8 (999) 999-99-99",
+    "email": "mltyandex@mail.ru",
+    "source": "mltyandex-source"
+  }
 }
