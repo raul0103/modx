@@ -204,6 +204,11 @@ if (!class_exists('similarProducts')) {
             // Запрос на получение всех опций по полученным товарам
             $sql = "SELECT * FROM {$this->table_prefix}ms2_product_options WHERE product_id IN (SELECT product_id FROM {$this->table_prefix}ms2_product_options AS sc WHERE product_id IN $where_product_id $where_options GROUP BY product_id);";
             $result = $this->modx->query($sql);
+
+            if ($result === false) {
+                return [];
+            }
+
             return $result->fetchAll(PDO::FETCH_ASSOC);
         }
 
