@@ -95,6 +95,12 @@ class QC
         $records = $this->modx->getCollection('QueueCallback', ['sent' => 0, 'log' => null]);
 
         foreach ($records as $record) {
+            $attempts = $record->get('attempts') ?: 0;
+            if ($attempts >= 2) continue;
+
+            $record->set('attempts', $attempts + 1);
+            $record->save();
+
             // >>> Пора ли отправляеть сообщение
             $date = strtotime($record->get('date'));
             $now = time();

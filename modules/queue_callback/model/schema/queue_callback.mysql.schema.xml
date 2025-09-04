@@ -19,5 +19,9 @@
 
         <!-- log -->
         <field key="log" dbtype="text" phptype="string" null="true" />
+
+        <!-- Количество попыток отправки -->
+        <field key="attempts" dbtype="int" precision="10" phptype="integer" null="false" default="0" />
+
     </object>
 </model>
