@@ -248,7 +248,10 @@ if (!class_exists('similarProducts')) {
         {
             $product_ids = $this->getProductIds($find_products);
             $product_ids = implode(',', $product_ids);
-            $sql = "SELECT id,pagetitle,uri FROM {$this->table_prefix}site_content WHERE id IN ($product_ids)";
+            $sql = "SELECT sc.id,sc.pagetitle,sc.uri,ms2p.thumb FROM {$this->table_prefix}site_content AS sc
+            LEFT JOIN {$this->table_prefix}ms2_products AS ms2p ON ms2p.id = sc.id
+            WHERE sc.id IN ($product_ids)";
+
             $result = $this->modx->query($sql);
             $rows = $result->fetchAll(PDO::FETCH_ASSOC);
 
