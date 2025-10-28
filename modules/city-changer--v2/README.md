@@ -14,3 +14,5 @@ try {
 - На кнопку которая будет открывать модалку с городами повесить onclick="city_changer.activate()"
 - На место где будет отображаться выбранный город data-city-changer-select-value
 - Вывести в удобном месте (обычно в модалке) чанк chunks/wrapper.tpl
+- Поставить перед запуском страницы скрипт `modules\city-changer--v2\snippets\cityDefinition.php`
+- Внести api/cookie.php в корнеь проекта для запросов

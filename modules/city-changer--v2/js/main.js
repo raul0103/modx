@@ -2,7 +2,7 @@ export default class CityChanger {
   constructor() {
     this.config = {
       find_cities_limit: 30, // Кол-во найденных городо вчерез поиск
-      default_city: "Москва",
+      // default_city: CITY_CHANGE || "Москва",
       storage_key: "city-changer", // Ключ для хранения города в локальном хранилище
     };
     this.data = {
@@ -17,7 +17,7 @@ export default class CityChanger {
       regions: "[data-city-changer-regions]",
       cities: "[data-city-changer-cities]",
       search_values: "[data-city-changer-search-values]",
-      select_value: "[data-city-changer-select-value]",
+      // select_value: "[data-city-changer-select-value]",
     };
     // Найлденные элементы
     this.elements = {
@@ -26,7 +26,7 @@ export default class CityChanger {
       regions: null,
       cities: null,
       search_values: null,
-      select_value: null,
+      // select_value: null,
     };
 
     /**
@@ -49,18 +49,24 @@ export default class CityChanger {
 
   async init() {
     this.initDOMElements();
-    this.setCity();
+    // this.setCity();
   }
 
   // УСтановит город в элемент this.elements.select_value на странице
-  setCity() {
-    if (!this.elements.select_value) return;
+  // setCity() {
+  //   const elements = document.querySelectorAll(
+  //     "[data-city-changer-select-value]"
+  //   );
+  //   if (!elements.length) return;
 
-    let city = localStorage.getItem(this.config.storage_key);
-    if (!city) city = this.config.default_city;
+  //   let city = localStorage.getItem(this.config.storage_key);
+  //   if (!city || this.config.default_city == "Москва")
+  //     city = this.config.default_city;
 
-    this.elements.select_value.textContent = city;
-  }
+  //   elements.forEach((elem) => {
+  //     elem.textContent = city;
+  //   });
+  // }
 
   // Активация модуля
   async activate() {
@@ -109,9 +115,9 @@ export default class CityChanger {
    */
   renderDomByData(
     keys = [
-      { key: "districts", element: "districts" },
-      { key: "regions", element: "regions" },
-      { key: "cities", element: "cities" },
+      {key: "districts", element: "districts"},
+      {key: "regions", element: "regions"},
+      {key: "cities", element: "cities"},
     ],
     data = this.render_data
   ) {
@@ -141,7 +147,7 @@ export default class CityChanger {
    * @param {string} key [districts | regions | cities] - Ключ от которого начнется выборка
    * @param {integer} id - Значение
    */
-  generateRenderData(key, id) {
+  async generateRenderData(key, id) {
     // Всегда одни и те же округи
     this.render_data.districts = this.data.value.districts;
 
@@ -181,11 +187,37 @@ export default class CityChanger {
 
       let find_city = this.data.value.cities.find((city) => city.id === id);
       if (find_city) {
-        this.elements.select_value.textContent = find_city.name;
-        localStorage.setItem(this.config.storage_key, find_city.name);
+        const [key, name] = [this.config.storage_key, find_city.name];
+
+        // this.setCity();
+        localStorage.setItem(key, name);
+
+        await fetch("api/cookie.php", {
+          method: "POST",
+          body: JSON.stringify({action: "set", name: key, value: name}),
+        });
       }
 
       location.reload();
+
+      // let subdomain = await window.getChangeCitySubdomain(find_city.name);
+      // if (!subdomain) {
+      //   subdomain = "moskva";
+      // }
+
+      // if (subdomain) {
+      //   if (subdomain == "moskva" && !CONTEXT_PREFIX[CONTEXT_KEY]) {
+      //     location.href = "https://" + MAIN_HOST + location.pathname;
+      //   } else {
+      //     location.href =
+      //       "https://" +
+      //       CONTEXT_PREFIX[CONTEXT_KEY] +
+      //       subdomain +
+      //       "." +
+      //       MAIN_HOST +
+      //       location.pathname;
+      //   }
+      // } else location.reload();
     }
   }
 
