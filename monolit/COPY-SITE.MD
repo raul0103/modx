@@ -79,7 +79,7 @@ DELETE FROM modx_context_setting WHERE context_key NOT IN ('web','mgr','tizol','
 Разрешения
 
 ```sql
-DELETE FROM modx_access_context WHERE context_key NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
+DELETE FROM modx_access_context WHERE `target` NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
 ```
 
 # 3. Заливаем на боевой + доливаем доп файлы которые на 1м шаге не скачивали
