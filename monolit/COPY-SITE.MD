@@ -52,6 +52,12 @@ Products INTRO
 DELETE FROM modx_mse2_intro WHERE resource NOT IN (SELECT id FROM modx_site_content)
 ```
 
+Галереи товаров
+
+```sql
+DELETE FROM modx_ms2_product_files WHERE product_id NOT IN (SELECT id FROM modx_site_content)
+```
+
 ---
 
 ## Контексты
