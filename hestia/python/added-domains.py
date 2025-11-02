@@ -1,8 +1,6 @@
 # Скрипт создает домены в hestia
 # + привязывает к ним aliases
-
-# !!! Максимальное кол-во asliases < 100
-
+#
 # После работы скрипта необходимо настроить созданный домен (версия php, путь к сайту)
 # Что-бы все изменения вступили в силу после работы скрипта необходимо сохранить созданный домен
 
@@ -18,15 +16,24 @@ SSH_PASS = ""
 
 HESTIA_USER = ""
 
-domains = [
-    "root-1.www-isotecti.ru"
-]
-aliases = [
-    "agalatovo.www-isotecti.ru",
-    "beloostrov.www-isotecti.ru",
-    "boksitogorsk.www-isotecti.ru",
-]
+# Если поддоменов больше 100 то необходимо создать несколько записей с домено
+# Поэтому удобно их называть web-1.domain.ru, web-2.domain.ru и к ним привязывать не более 100 поддоменов
+alias_prefix = "web-1"
 
+domains = [
+    "www-baswool.ru",
+    "www-beltep.ru",
+    "www-ceresit.ru",
+    "www-isotecti.ru",
+    "www-izomin.ru",
+    "www-izovol.ru",
+    "www-ruspanel.ru",
+    "www-tizol.ru",
+    "www-xotpipe.ru",
+]
+subdomains = [
+    "abinsk", "krasnodar"
+]
 # ---------------- Логирование ---------------- #
 logging.basicConfig(
     level=logging.INFO,
@@ -89,10 +96,11 @@ def add_letsencrypt_domain(domain: str, aliases: str):
 # ---------------- Основная логика ---------------- #
 try:
     for domain in domains:
-        new_domain = f"{domain}"
+        new_domain = f"{alias_prefix}.{domain}"
         logging.info(f"⚙️ Обработка домена: {new_domain}")
 
-        aliases = ",".join([alias for alias in aliases])
+        aliases = ",".join(
+            [f"{subdomain}.{domain}" for subdomain in subdomains])
         logging.info(f"🔗 Алиасы: {aliases}")
 
         # Пример последовательности:
