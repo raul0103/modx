@@ -20,6 +20,7 @@ HESTIA_USER = ""
 # Поэтому удобно их называть web-1.domain.ru, web-2.domain.ru и к ним привязывать не более 100 поддоменов
 alias_prefix = "web-1"
 
+added_domain_to_aliases = True  # Добавить основной домен в список aliases
 domains = [
     "www-baswool.ru",
     "www-beltep.ru",
@@ -32,7 +33,8 @@ domains = [
     "www-xotpipe.ru",
 ]
 subdomains = [
-    "abinsk", "krasnodar"
+    "abinsk",
+    "krasnodar"
 ]
 # ---------------- Логирование ---------------- #
 logging.basicConfig(
@@ -99,8 +101,11 @@ try:
         new_domain = f"{alias_prefix}.{domain}"
         logging.info(f"⚙️ Обработка домена: {new_domain}")
 
-        aliases = ",".join(
-            [f"{subdomain}.{domain}" for subdomain in subdomains])
+        aliases = ",".join([f"{sub}.{domain}" for sub in subdomains])
+
+        if added_domain_to_aliases:
+            aliases = f"{aliases},{domain}"
+
         logging.info(f"🔗 Алиасы: {aliases}")
 
         # Пример последовательности:
