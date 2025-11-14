@@ -86,7 +86,7 @@ if (!class_exists('MainHandler')) {
         {
             global $modx;
 
-            $context_config = include __DIR__ . "/config/contexts/{$this->main_data['context_key']}.php";
+            $context_config = include dirname(dirname(__DIR__)) . "/config/contexts/{$this->main_data['context_key']}.php";
 
             // Если сайт загружен без поддомена - меняем контекст
             if (!$this->main_data['subdomain']['value']) {
