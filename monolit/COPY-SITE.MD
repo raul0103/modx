@@ -410,3 +410,47 @@ foreach ($products as $product) {
     }
 }
 ```
+
+---
+
+При переносе на другую админку через CLONER  
+Получение шаблонов текущего сайта
+
+```php
+<?php
+
+// создаём запрос
+$query = $modx->newQuery('modResource');
+
+// выбираем ID шаблона (template) и его имя (modTemplate.templatename)
+$query->select([
+    'modResource.template',
+    'Template.templatename'
+]);
+
+// соединяем таблицу шаблонов
+$query->leftJoin('modTemplate', 'Template', 'Template.id = modResource.template');
+
+// фильтр по контексту
+$query->where([
+    'modResource.context_key' => 'zbi500',
+]);
+
+// уникальные template ID
+$query->groupby('modResource.template');
+
+// выполняем запрос
+$query->prepare();
+$query->stmt->execute();
+
+// получаем пары ID => Название
+$rows = $query->stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$result = [];
+foreach ($rows as $row) {
+    $result[$row['template']] = $row['templatename'];
+}
+
+print_r($result);
+
+```
