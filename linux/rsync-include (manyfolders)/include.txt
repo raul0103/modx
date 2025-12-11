@@ -1,0 +1,7 @@
++ /assets/
++ /assets/images/
++ /assets/images/products/
++ /assets/images/products/12345/
++ /assets/images/products/10000/
++ /assets/images/products/54321/
+- *

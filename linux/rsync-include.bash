@@ -12,5 +12,5 @@ rsync -av \
   --include='/assets/template/img/import/d7663279d7069ef382ac8b6b015586fe.pdf' \
   --include='/assets/template/img/import/5c6bbfee1ee89ce615a4754747536359.pdf' \
   --exclude='*' \
-  /home/minvata/web/minvata.dev.skderdom.beget.tech/public_html/ \
-  root@193.42.125.65:/home/user/web/root.tsk-msk.gazobeton.waskuli.beget.tech/public_html/
+  /home/minvata/web/path/public_html/ \
+  root@193.42.125.65:/home/user/web/new_path/public_html/
