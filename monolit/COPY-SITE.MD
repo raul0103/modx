@@ -454,3 +454,84 @@ foreach ($rows as $row) {
 print_r($result);
 
 ```
+
+К категориям могут не привязаться все опции. Поэтому необходимо
+
+1. Получить с оригинала
+
+```sql
+SELECT mo.`key` AS option_key,msc.alias AS category_alias,mco.`rank` FROM modx_ms2_category_options AS mco
+JOIN modx_ms2_options AS mo ON mo.id = mco.option_id
+JOIN modx_site_content AS msc ON msc.id = mco.category_id
+WHERE category_id IN (SELECT id FROM modx_site_content WHERE context_key = 'zbi500')
+```
+
+2. Массивом PHP прогнать на новом сайте
+
+```php
+<?php
+
+$items = [
+  [
+    'option_key' => 'razmer',
+    'category_alias' => 'bruschatka-trotuarnaya',
+    'rank' => 19,
+  ],
+  [
+    'option_key' => 'obyem_m3',
+    'category_alias' => 'aehrodromnye-plity',
+    'rank' => 15,
+  ],
+  [
+    'option_key' => 'obyem_m3',
+    'category_alias' => 'plityi-dorozhnyie-2p',
+    'rank' => 17,
+  ],
+  [
+    'option_key' => 'obyem_m3',
+    'category_alias' => 'plity-dorozhnye-1p',
+    'rank' => 18,
+  ],
+];
+
+foreach ($items as $item) {
+
+  $option = $modx->getObject('msOption', [
+    'key' => $item['option_key']
+  ]);
+
+  $category = $modx->getObject('modResource', [
+    'alias' => $item['category_alias']
+  ]);
+
+  if (!$option || !$category) {
+    echo "not found: {$item['option_key']} / {$item['category_alias']}" . PHP_EOL;
+    continue;
+  }
+
+  $insertData = [
+    'option_id'   => $option->get('id'),
+    'category_id' => $category->get('id'),
+    'rank'        => $item['rank'],
+  ];
+
+  $sql = "
+    INSERT INTO modx_ms2_category_options
+    (option_id, category_id, `rank`, active, required,value)
+    VALUES (:option_id, :category_id, :rank, 1, 0, '')
+  ";
+
+  $stmt = $modx->prepare($sql);
+  $result = $stmt->execute($insertData);
+
+  if ($result) {
+    echo "success: {$item['option_key']} -> {$item['category_alias']}" . PHP_EOL;
+  } else {
+    $errorInfo = $stmt->errorInfo();
+    echo "error: " . print_r($errorInfo, true) . PHP_EOL;
+  }
+}
+
+echo "done";
+
+```
