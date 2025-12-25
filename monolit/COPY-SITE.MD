@@ -413,7 +413,8 @@ foreach ($products as $product) {
 
 ---
 
-При переносе на другую админку через CLONER  
+# При переносе на другую админку через CLONER
+
 Получение шаблонов текущего сайта
 
 ```php
@@ -534,4 +535,159 @@ foreach ($items as $item) {
 
 echo "done";
 
+```
+
+### Данные для msProductsComposerSelection
+
+С оригинала сайта скопировать на новый всю таблицу modx_products_composer_selection
+
+#### 🟢 СКРИПТ 1 — ДОНOР
+
+Запустить на доноре
+
+```php
+ <?php
+  /**
+  * DONOR SCRIPT
+  * Собирает:
+  * 1. rid → alias
+  * 2. parent IDs → alias
+  */
+
+  $context = 'fasad';
+  $file = MODX_BASE_PATH . 'ms_products_composer_map.json';
+
+  /* =========================
+  * RID (msCategory)
+  * ========================= */
+  $categories = $modx->getCollection('modResource', [
+      'context_key' => $context,
+      'class_key'   => 'msCategory'
+  ]);
+
+  $rid = [];
+  foreach ($categories as $cat) {
+      $rid[$cat->id] = $cat->alias;
+  }
+
+  /* =========================
+  * PARENT
+  * ========================= */
+  $res = $modx->query("
+      SELECT val
+      FROM modx_products_composer_selection
+      WHERE `key` = 'parent'
+  ");
+
+  $parentsIds = [];
+  foreach ($res->fetchAll(PDO::FETCH_ASSOC) as $row) {
+      $parentsIds = array_merge($parentsIds, explode(',', $row['val']));
+  }
+
+  $parentsIds = array_unique(array_filter($parentsIds));
+
+  $parentsResources = $modx->getCollection('modResource', [
+      'id:in' => $parentsIds
+  ]);
+
+  $parents = [];
+  foreach ($parentsResources as $res) {
+      $parents[$res->id] = $res->alias;
+  }
+
+  /* =========================
+  * SAVE
+  * ========================= */
+  $data = [
+      'rid'    => $rid,
+      'parent' => $parents
+  ];
+
+  file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+  echo 'DONOR: success';
+
+```
+
+#### 🔵 СКРИПТ 2 — НОВЫЙ САЙТ
+
+Запускается на новом сайте
+
+```php
+<?php
+/**
+ * TARGET SCRIPT
+ * Обновляет:
+ * 1. rid
+ * 2. parent
+ */
+
+$file = MODX_BASE_PATH . 'ms_products_composer_map.json';
+$data = json_decode(file_get_contents($file), true);
+
+if (!$data) {
+    exit('JSON not found or invalid');
+}
+
+/* =========================
+ * UPDATE RID
+ * ========================= */
+foreach ($data['rid'] as $oldId => $alias) {
+
+    $resource = $modx->getObject('modResource', ['alias' => $alias]);
+    if (!$resource) {
+        continue;
+    }
+
+    $newId = $resource->id;
+
+    $modx->query("
+        UPDATE modx_products_composer_selection
+        SET rid = {$newId}
+        WHERE rid = {$oldId}
+    ");
+}
+
+/* =========================
+ * UPDATE PARENT
+ * ========================= */
+$res = $modx->query("
+    SELECT id, val
+    FROM modx_products_composer_selection
+    WHERE `key` = 'parent'
+");
+
+$rows = $res->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($rows as $row) {
+
+    $parents = explode(',', $row['val']);
+    $newParents = [];
+
+    foreach ($parents as $oldParentId) {
+
+        if (!isset($data['parent'][$oldParentId])) {
+            continue;
+        }
+
+        $alias = $data['parent'][$oldParentId];
+        $resource = $modx->getObject('modResource', ['alias' => $alias]);
+
+        if ($resource) {
+            $newParents[] = $resource->id;
+        }
+    }
+
+    if (!empty($newParents)) {
+        $ids = implode(',', array_unique($newParents));
+
+        $modx->query("
+            UPDATE modx_products_composer_selection
+            SET val = '{$ids}'
+            WHERE id = {$row['id']}
+        ");
+    }
+}
+
+echo 'TARGET: success';
 ```
