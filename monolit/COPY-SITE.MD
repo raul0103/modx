@@ -537,7 +537,7 @@ echo "done";
 
 ```
 
-### Данные для msProductsComposerSelection
+### Данные для msProductsComposerSelection и modx_ss_rules
 
 С оригинала сайта скопировать на новый всю таблицу modx_products_composer_selection
 
@@ -690,6 +690,76 @@ foreach ($rows as $row) {
 }
 
 echo 'TARGET: success';
+```
+
+#### 🔵 СКРИПТ 3 - НОВЫЙ САЙТ
+
+Данные для modx_ss_rules - Плагин который в товаре выводит "Вам могут понадобиться" табами
+
+```php
+<?php
+/**
+ * UPDATE modx_ss_rules.categories
+ * old_id → alias → new_id
+ */
+
+$file = MODX_BASE_PATH . 'ms_products_composer_map.json';
+$data = json_decode(file_get_contents($file), true);
+
+if (!$data || empty($data['rid'])) {
+    exit('Mapping file not found or invalid');
+}
+
+/* =========================
+ * LOAD RULES
+ * ========================= */
+$res = $modx->query("
+    SELECT id, categories
+    FROM modx_ss_rules
+    WHERE categories IS NOT NULL
+      AND categories != ''
+");
+
+$rows = $res->fetchAll(PDO::FETCH_ASSOC);
+
+/* =========================
+ * UPDATE
+ * ========================= */
+foreach ($rows as $row) {
+
+    $oldIds = explode(',', $row['categories']);
+    $newIds = [];
+
+    foreach ($oldIds as $oldId) {
+        $oldId = trim($oldId);
+
+        // old_id → alias
+        if (!isset($data['rid'][$oldId])) {
+            continue;
+        }
+
+        $alias = $data['rid'][$oldId];
+
+        // alias → new_id
+        $resource = $modx->getObject('modResource', ['alias' => $alias]);
+        if ($resource) {
+            $newIds[] = $resource->id;
+        }
+    }
+
+    if (!empty($newIds)) {
+
+        $newIds = implode(',', array_unique($newIds));
+
+        $modx->query("
+            UPDATE modx_ss_rules
+            SET categories = '{$newIds}'
+            WHERE id = {$row['id']}
+        ");
+    }
+}
+
+echo 'SS RULES: success';
 ```
 
 # Заключение
