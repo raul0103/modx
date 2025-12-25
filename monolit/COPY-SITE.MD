@@ -691,3 +691,11 @@ foreach ($rows as $row) {
 
 echo 'TARGET: success';
 ```
+
+# Заключение
+
+- Проверить:
+  - Формы
+  - robots
+  - sitemap.xml
+  - Политика конфиденциальности
