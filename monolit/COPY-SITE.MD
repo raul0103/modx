@@ -79,11 +79,14 @@ DELETE FROM modx_mse2_intro WHERE resource NOT IN (SELECT id FROM modx_site_cont
 DELETE FROM modx_ms2_product_files WHERE product_id NOT IN (SELECT id FROM modx_site_content)
 ```
 
-## </details>
+</details>
 
 ## Контексты
 
 **Важно:** _не трогать **mgr,web**!_
+
+<details>
+<summary>Показать код</summary>
 
 Лишние контексты
 
@@ -102,6 +105,8 @@ DELETE FROM modx_context_setting WHERE context_key NOT IN ('web','mgr','tizol','
 ```sql
 DELETE FROM modx_access_context WHERE `target` NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
 ```
+
+</details>
 
 # 3. Заливаем на боевой + доливаем доп файлы которые на 1м шаге не скачивали
 
