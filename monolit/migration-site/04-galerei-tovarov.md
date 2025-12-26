@@ -63,6 +63,7 @@ root@193.42.125.65:/home/user/web/new_path/public_html/
 ### Шаг 3: Проверка
 
 После переноса проверьте:
+
 - [ ] Файлы галерей находятся в правильных папках
 - [ ] Записи в таблице `modx_ms2_product_files` соответствуют ID товаров
 - [ ] Галереи отображаются корректно на сайте
@@ -72,6 +73,7 @@ root@193.42.125.65:/home/user/web/new_path/public_html/
 ## Сценарий 2: ID изменились
 
 Если ID товаров изменились после переноса, необходимо обновить:
+
 1. Названия папок галерей
 2. Записи в таблице `modx_ms2_product_files`
 
@@ -80,8 +82,8 @@ root@193.42.125.65:/home/user/web/new_path/public_html/
 Сначала получите список всех товаров с их URI (для сопоставления старых и новых ID):
 
 ```sql
-SELECT id, uri FROM modx_site_content 
-WHERE class_key = 'msProduct' 
+SELECT id, uri FROM modx_site_content
+WHERE class_key = 'msProduct'
 ORDER BY id
 ```
 
@@ -101,7 +103,7 @@ ORDER BY id
  */
 
 // Получаем все товары с их URI
-$products = $modx->getCollection('msProduct');
+$products = $modx->getCollection('msProduct',['context_key' => 'CONTEXT']);
 $mapping = [];
 
 foreach ($products as $product) {
@@ -153,7 +155,7 @@ foreach ($oldMapping as $uri => $oldId) {
 foreach ($idMapping as $oldId => $newId) {
     $oldPath = $productsPath . $oldId;
     $newPath = $productsPath . $newId;
-    
+
     if (is_dir($oldPath) && !is_dir($newPath)) {
         rename($oldPath, $newPath);
         echo "Переименовано: $oldId → $newId\n";
@@ -193,8 +195,8 @@ foreach ($oldMapping as $uri => $oldId) {
 // Обновляем таблицу
 foreach ($idMapping as $oldId => $newId) {
     $modx->query("
-        UPDATE modx_ms2_product_files 
-        SET product_id = {$newId} 
+        UPDATE modx_ms2_product_files
+        SET product_id = {$newId}
         WHERE product_id = {$oldId}
     ");
     echo "Обновлено: $oldId → $newId\n";
@@ -208,7 +210,7 @@ echo "Готово!";
 ### Шаг 5: Проверка
 
 После выполнения всех шагов проверьте:
+
 - [ ] Все папки галерей переименованы правильно
 - [ ] Записи в `modx_ms2_product_files` обновлены
 - [ ] Галереи отображаются корректно на сайте
-
