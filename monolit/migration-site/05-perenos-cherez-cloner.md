@@ -2,6 +2,20 @@
 
 При переносе сайта на другую админку через компонент CLONER могут возникнуть дополнительные задачи.
 
+> ⚠️ **Важно:** Перед выполнением шагов этого раздела проверьте, изменились ли ID ресурсов после переноса через CLONER. Это определит, какие скрипты необходимо запускать.
+
+## Проверка изменения ID ресурсов
+
+После переноса через CLONER ID ресурсов могут измениться. Проверьте это:
+
+1. Выберите несколько ресурсов (категорий, товаров) на старом сайте и запомните их ID и URI
+2. Найдите эти же ресурсы на новом сайте по URI
+3. Сравните ID
+
+**Если ID совпадают** → многие скрипты можно пропустить или упростить
+
+**Если ID не совпадают** → необходимо выполнить все скрипты из этого раздела
+
 ## Получение шаблонов текущего сайта
 
 Получаем список всех шаблонов, используемых в указанном контексте.
@@ -53,6 +67,8 @@ print_r($result);
 ## Восстановление опций категорий
 
 > ⚠️ **Проблема:** К категориям могут не привязаться все опции после переноса через CLONER.
+
+> 💡 **Примечание:** Этот шаг необходим независимо от того, изменились ID или нет, так как опции могут не привязаться из-за особенностей работы CLONER.
 
 ### Шаг 1: Получение данных с оригинала
 
@@ -149,241 +165,12 @@ echo "done";
 
 ## Данные для msProductsComposerSelection и modx_ss_rules
 
-> ⚠️ **Важно:** С оригинала сайта необходимо скопировать на новый всю таблицу `modx_products_composer_selection`.
+> ⚠️ **Важно:** 
+> - С оригинала сайта необходимо скопировать на новый всю таблицу `modx_products_composer_selection`
+> - **Если ID ресурсов изменились**, необходимо выполнить скрипты обновления из раздела [6. Дополнительные данные](06-dopolnitelno.md)
+> - **Если ID не изменились**, просто скопируйте таблицу и пропустите скрипты обновления
 
-### 🟢 СКРИПТ 1 — ДОНОР
+> 💡 **Как определить:** Если ID ресурсов не изменились, значения в таблице `modx_products_composer_selection` уже корректны и обновление не требуется.
 
-Запустить на доноре для подготовки данных миграции.
-
-<details>
-<summary>Показать код</summary>
-
-```php
- <?php
-  /**
-  * DONOR SCRIPT
-  * Собирает:
-  * 1. rid → uri
-  * 2. parent IDs → uri
-  */
-
-  $context = 'fasad';
-  $file = MODX_BASE_PATH . 'ms_products_composer_map.json';
-
-  /* =========================
-  * RID (msCategory)
-  * ========================= */
-  $categories = $modx->getCollection('modResource', [
-      'context_key' => $context,
-      'class_key'   => 'msCategory'
-  ]);
-
-  $rid = [];
-  foreach ($categories as $cat) {
-      $rid[$cat->id] = $cat->uri;
-  }
-
-  /* =========================
-  * PARENT
-  * ========================= */
-  $res = $modx->query("
-      SELECT val
-      FROM modx_products_composer_selection
-      WHERE `key` = 'parent'
-  ");
-
-  $parentsIds = [];
-  foreach ($res->fetchAll(PDO::FETCH_ASSOC) as $row) {
-      $parentsIds = array_merge($parentsIds, explode(',', $row['val']));
-  }
-
-  $parentsIds = array_unique(array_filter($parentsIds));
-
-  $parentsResources = $modx->getCollection('modResource', [
-      'id:in' => $parentsIds
-  ]);
-
-  $parents = [];
-  foreach ($parentsResources as $res) {
-      $parents[$res->id] = $res->uri;
-  }
-
-  /* =========================
-  * SAVE
-  * ========================= */
-  $data = [
-      'rid'    => $rid,
-      'parent' => $parents
-  ];
-
-  file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-
-  echo 'DONOR: success';
-
-```
-
-</details>
-
-### 🔵 СКРИПТ 2 — НОВЫЙ САЙТ
-
-Обновление данных в таблице `modx_products_composer_selection` на новом сайте.
-
-<details>
-<summary>Показать код</summary>
-
-```php
-<?php
-/**
- * TARGET SCRIPT
- * Обновляет:
- * 1. rid
- * 2. parent
- */
-
-$file = MODX_BASE_PATH . 'ms_products_composer_map.json';
-$data = json_decode(file_get_contents($file), true);
-
-if (!$data) {
-    exit('JSON not found or invalid');
-}
-
-/* =========================
- * UPDATE RID
- * ========================= */
-foreach ($data['rid'] as $oldId => $uri) {
-
-    $resource = $modx->getObject('modResource', ['uri' => $uri]);
-    if (!$resource) {
-        continue;
-    }
-
-    $newId = $resource->id;
-
-    $modx->query("
-        UPDATE modx_products_composer_selection
-        SET rid = {$newId}
-        WHERE rid = {$oldId}
-    ");
-}
-
-/* =========================
- * UPDATE PARENT
- * ========================= */
-$res = $modx->query("
-    SELECT id, val
-    FROM modx_products_composer_selection
-    WHERE `key` = 'parent'
-");
-
-$rows = $res->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($rows as $row) {
-
-    $parents = explode(',', $row['val']);
-    $newParents = [];
-
-    foreach ($parents as $oldParentId) {
-
-        if (!isset($data['parent'][$oldParentId])) {
-            continue;
-        }
-
-        $uri = $data['parent'][$oldParentId];
-        $resource = $modx->getObject('modResource', ['uri' => $uri]);
-
-        if ($resource) {
-            $newParents[] = $resource->id;
-        }
-    }
-
-    if (!empty($newParents)) {
-        $ids = implode(',', array_unique($newParents));
-
-        $modx->query("
-            UPDATE modx_products_composer_selection
-            SET val = '{$ids}'
-            WHERE id = {$row['id']}
-        ");
-    }
-}
-
-echo 'TARGET: success';
-```
-
-</details>
-
-### 🔵 СКРИПТ 3 — НОВЫЙ САЙТ
-
-Обновление данных для плагина `modx_ss_rules` (плагин выводит "Вам могут понадобиться" табами в товаре).
-
-<details>
-<summary>Показать код</summary>
-
-```php
-<?php
-/**
- * UPDATE modx_ss_rules.categories
- * old_id → uri → new_id
- */
-
-$file = MODX_BASE_PATH . 'ms_products_composer_map.json';
-$data = json_decode(file_get_contents($file), true);
-
-if (!$data || empty($data['rid'])) {
-    exit('Mapping file not found or invalid');
-}
-
-/* =========================
- * LOAD RULES
- * ========================= */
-$res = $modx->query("
-    SELECT id, categories
-    FROM modx_ss_rules
-    WHERE categories IS NOT NULL
-      AND categories != ''
-");
-
-$rows = $res->fetchAll(PDO::FETCH_ASSOC);
-
-/* =========================
- * UPDATE
- * ========================= */
-foreach ($rows as $row) {
-
-    $oldIds = explode(',', $row['categories']);
-    $newIds = [];
-
-    foreach ($oldIds as $oldId) {
-        $oldId = trim($oldId);
-
-        // old_id → uri
-        if (!isset($data['rid'][$oldId])) {
-            continue;
-        }
-
-        $uri = $data['rid'][$oldId];
-
-        // uri → new_id
-        $resource = $modx->getObject('modResource', ['uri' => $uri]);
-        if ($resource) {
-            $newIds[] = $resource->id;
-        }
-    }
-
-    if (!empty($newIds)) {
-
-        $newIds = implode(',', array_unique($newIds));
-
-        $modx->query("
-            UPDATE modx_ss_rules
-            SET categories = '{$newIds}'
-            WHERE id = {$row['id']}
-        ");
-    }
-}
-
-echo 'SS RULES: success';
-```
-
-</details>
+Подробные инструкции и скрипты для обновления данных при изменении ID находятся в разделе [6. Дополнительные данные](06-dopolnitelno.md).
 

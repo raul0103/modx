@@ -2,29 +2,32 @@
 
 После переноса файлов необходимо очистить базу данных от лишних данных.
 
-> ⚠️ **Внимание:** Перед выполнением SQL-запросов обязательно создайте резервную копию базы данных!
+> ⚠️ **Критически важно:** Перед выполнением SQL-запросов **обязательно создайте резервную копию базы данных!**
+
+> 💡 **Рекомендация:** Выполняйте запросы последовательно и проверяйте результаты после каждого шага.
 
 ## Ресурсы
+
+Очистка связанных данных для удаленных ресурсов.
 
 ### Удаление ресурсов по контекстам
 
 Удаляем все ресурсы, которые не относятся к нужным контекстам.
 
-<details>
-<summary>Показать код</summary>
+> ⚠️ **Внимание:** Убедитесь, что список контекстов в запросе соответствует вашим требованиям!
 
 ```sql
-DELETE FROM modx_site_content WHERE context_key NOT IN ('tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
+DELETE FROM modx_site_content 
+WHERE context_key NOT IN ('tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
 ```
-
-</details>
 
 ### Товары
 
 Удаляем товары, которые не связаны с существующими ресурсами.
 
 ```sql
-DELETE FROM modx_ms2_products WHERE id NOT IN (SELECT id FROM modx_site_content)
+DELETE FROM modx_ms2_products 
+WHERE id NOT IN (SELECT id FROM modx_site_content)
 ```
 
 ### TV (Template Variables)
@@ -32,7 +35,8 @@ DELETE FROM modx_ms2_products WHERE id NOT IN (SELECT id FROM modx_site_content)
 Очищаем значения TV-полей для удаленных ресурсов.
 
 ```sql
-DELETE FROM modx_site_tmplvar_contentvalues WHERE contentid NOT IN (SELECT id FROM modx_site_content)
+DELETE FROM modx_site_tmplvar_contentvalues 
+WHERE contentid NOT IN (SELECT id FROM modx_site_content)
 ```
 
 ### Опции товаров
@@ -40,7 +44,8 @@ DELETE FROM modx_site_tmplvar_contentvalues WHERE contentid NOT IN (SELECT id FR
 Удаляем опции товаров для несуществующих товаров.
 
 ```sql
-DELETE FROM modx_ms2_product_options WHERE product_id NOT IN (SELECT id FROM modx_site_content)
+DELETE FROM modx_ms2_product_options 
+WHERE product_id NOT IN (SELECT id FROM modx_site_content)
 ```
 
 ### Опции категорий
@@ -48,7 +53,8 @@ DELETE FROM modx_ms2_product_options WHERE product_id NOT IN (SELECT id FROM mod
 Удаляем опции категорий для несуществующих категорий.
 
 ```sql
-DELETE FROM modx_ms2_category_options WHERE category_id NOT IN (SELECT id FROM modx_site_content)
+DELETE FROM modx_ms2_category_options 
+WHERE category_id NOT IN (SELECT id FROM modx_site_content)
 ```
 
 ### Products INTRO
@@ -56,7 +62,8 @@ DELETE FROM modx_ms2_category_options WHERE category_id NOT IN (SELECT id FROM m
 Очищаем интротексты для удаленных ресурсов.
 
 ```sql
-DELETE FROM modx_mse2_intro WHERE resource NOT IN (SELECT id FROM modx_site_content)
+DELETE FROM modx_mse2_intro 
+WHERE resource NOT IN (SELECT id FROM modx_site_content)
 ```
 
 ### Галереи товаров
@@ -64,37 +71,44 @@ DELETE FROM modx_mse2_intro WHERE resource NOT IN (SELECT id FROM modx_site_cont
 Удаляем файлы галерей для несуществующих товаров.
 
 ```sql
-DELETE FROM modx_ms2_product_files WHERE product_id NOT IN (SELECT id FROM modx_site_content)
+DELETE FROM modx_ms2_product_files 
+WHERE product_id NOT IN (SELECT id FROM modx_site_content)
 ```
-
-</details>
 
 ## Контексты
 
-> ⚠️ **Важно:** Не трогать контексты **mgr** и **web**!
+> ⚠️ **Критически важно:** Не трогать контексты **mgr** и **web**! Они необходимы для работы системы.
 
 ### Удаление лишних контекстов
 
-<details>
-<summary>Показать код</summary>
+Выполняйте запросы в указанном порядке:
 
-#### Лишние контексты
-
-```sql
-DELETE FROM modx_context WHERE `key` NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
-```
-
-#### Настройки контекстов
+#### 1. Лишние контексты
 
 ```sql
-DELETE FROM modx_context_setting WHERE context_key NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
+DELETE FROM modx_context 
+WHERE `key` NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
 ```
 
-#### Разрешения
+#### 2. Настройки контекстов
 
 ```sql
-DELETE FROM modx_access_context WHERE `target` NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
+DELETE FROM modx_context_setting 
+WHERE context_key NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
 ```
 
-</details>
+#### 3. Разрешения
 
+```sql
+DELETE FROM modx_access_context 
+WHERE `target` NOT IN ('web','mgr','tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
+```
+
+## Проверка после очистки
+
+После выполнения всех запросов рекомендуется проверить:
+
+- [ ] Количество ресурсов соответствует ожидаемому
+- [ ] Все нужные контексты присутствуют
+- [ ] Контексты `mgr` и `web` не удалены
+- [ ] Связанные данные (TV, опции, галереи) очищены корректно
