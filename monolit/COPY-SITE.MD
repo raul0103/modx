@@ -2,6 +2,9 @@
 
 Переносим без лишних тяжелых файлов. Пример:
 
+<details>
+<summary>Показать код</summary>
+
 ```bash
 rsync -av \
   --exclude '_src/' \
@@ -21,6 +24,8 @@ rsync -av \
   root@111.111.111.65:/home/user/web/new_path/public_html/
 ```
 
+</details>
+
 # 2. Чистка базы данных
 
 Есть еще различные вспомогательные таблицы, которые тоже можно очистить
@@ -28,6 +33,9 @@ rsync -av \
 ## Ресурсы
 
 Удаление ресурсов по контекстам
+
+<details>
+<summary>Показать код</summary>
 
 ```sql
 DELETE FROM modx_site_content WHERE context_key NOT IN ('tizol','beltep','baswool','xotpipe','isotecti','ruspanel')
@@ -71,7 +79,7 @@ DELETE FROM modx_mse2_intro WHERE resource NOT IN (SELECT id FROM modx_site_cont
 DELETE FROM modx_ms2_product_files WHERE product_id NOT IN (SELECT id FROM modx_site_content)
 ```
 
----
+## </details>
 
 ## Контексты
 
@@ -120,6 +128,9 @@ SELECT * FROM modx_site_tmplvar_contentvalues WHERE `value` LIKE '%chertezhi%'
 Поэтому необходимо написать скрипты для переноса всех картинок с `_import/files` например в `assets/images/tv`
 
 Так как обычно это картинки для категорий, вот рабочий скрипт:
+
+<details>
+<summary>Показать код</summary>
 
 ```php
 <?php
@@ -189,11 +200,16 @@ $modx->log(modX::LOG_LEVEL_INFO, "Готово!");
 
 ```
 
+</details>
+
 # 4. Галереи товаров
 
 После переноса на сервер, необходимо импортнуть галереи из ../public_html/assets/images/products
 
 1. Создать файл
+
+<details>
+<summary>Показать код</summary>
 
 ```txt
     + /assets/
@@ -205,13 +221,20 @@ $modx->log(modX::LOG_LEVEL_INFO, "Готово!");
     - *
 ```
 
+</details>
+
 2. Запустить скрипт
+
+<details>
+<summary>Показать код</summary>
 
 ```bash
 rsync -av --include-from=include.txt \
 /home/minvata/web/path/public_html/ \
 root@193.42.125.65:/home/user/web/new_path/public_html/
 ```
+
+</details>
 
 3. Если ID товаров изменились то необходимо изменить названия папок и так же в modx_ms2_product_files. Можно получить uri с сайта оригинала, и по нему на новом сайте получать новый ID товара и менять старый ID На новый
 
@@ -220,6 +243,9 @@ root@193.42.125.65:/home/user/web/new_path/public_html/
 # При переносе на другую админку через CLONER
 
 Получение шаблонов текущего сайта
+
+<details>
+<summary>Показать код</summary>
 
 ```php
 <?php
@@ -260,9 +286,14 @@ print_r($result);
 
 ```
 
+</details>
+
 К категориям могут не привязаться все опции. Поэтому необходимо
 
 1. Получить с оригинала
+
+<details>
+<summary>Показать код</summary>
 
 ```sql
 SELECT mo.`key` AS option_key,msc.uri AS category_uri,mco.`rank` FROM modx_ms2_category_options AS mco
@@ -271,7 +302,12 @@ JOIN modx_site_content AS msc ON msc.id = mco.category_id
 WHERE category_id IN (SELECT id FROM modx_site_content WHERE context_key = 'zbi500')
 ```
 
+</details>
+
 2. Массивом PHP прогнать на новом сайте
+
+<details>
+<summary>Показать код</summary>
 
 ```php
 <?php
@@ -341,6 +377,8 @@ echo "done";
 
 ```
 
+</details>
+
 ### Данные для msProductsComposerSelection и modx_ss_rules
 
 С оригинала сайта скопировать на новый всю таблицу modx_products_composer_selection
@@ -348,6 +386,9 @@ echo "done";
 #### 🟢 СКРИПТ 1 — ДОНOР
 
 Запустить на доноре
+
+<details>
+<summary>Показать код</summary>
 
 ```php
  <?php
@@ -413,9 +454,14 @@ echo "done";
 
 ```
 
+</details>
+
 #### 🔵 СКРИПТ 2 — НОВЫЙ САЙТ
 
 Запускается на новом сайте
+
+<details>
+<summary>Показать код</summary>
 
 ```php
 <?php
@@ -496,9 +542,14 @@ foreach ($rows as $row) {
 echo 'TARGET: success';
 ```
 
+</details>
+
 #### 🔵 СКРИПТ 3 - НОВЫЙ САЙТ
 
 Данные для modx_ss_rules - Плагин который в товаре выводит "Вам могут понадобиться" табами
+
+<details>
+<summary>Показать код</summary>
 
 ```php
 <?php
@@ -565,6 +616,8 @@ foreach ($rows as $row) {
 
 echo 'SS RULES: success';
 ```
+
+</details>
 
 # Заключение
 
