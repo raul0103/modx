@@ -1,39 +1,27 @@
 <?php
 
+ini_set("max_execution_time", 0);
+
 /**
- * Скрипт создает CSV файл в корне сайта, с данными по опциям товаров выбранного контекста
- * Об оптимизации не думал, накидал на коленке
+ * Скрипт создает CSV файл в корне сайта
+ * alias товара + alias родителя + ссылки на картинки
+ * 
+ * сохарнит результат в _export-product-gallery/offset.csv
  */
 
-$limit = 5000;
+$limit = 10;
 $offset = 0;
-$context_key = "metallprofil";
-$class_key = "msProduct";
-$resources = []; // ID ресурсов для выборки, если пусто то не учитывается
-$table_prefix = $modx->getOption('table_prefix');
+$context_key = "krovelnyjstroymarket";
+$domain_images = "gazosilikatstroy.ru"; // Домен от куда получать картинки
 
-//> Подключаем MODX
-@include_once(dirname(dirname(__DIR__)) . '/config.core.php');
-@include_once(dirname(dirname(__DIR__)) . '/core/model/modx/modx.class.php');
-
-$modx = new modX();
-$modx->initialize('mgr');
-//<
-
-
-
-/**
- * Сбор товаров и их опций
- */
+// Получение товаров
 $query = $modx->newQuery('msProduct');
 $query->limit($limit, $offset); // limit, offset
 $where = [
     'context_key' => $context_key,
-    'class_key' => $class_key,
+    'class_key' => "msProduct",
 ];
-if (!empty($resources)) {
-    $where['id:in'] = $resources;
-}
+
 $query->where($where);
 $products = $modx->getCollection('msProduct', $query);
 
@@ -43,9 +31,8 @@ foreach ($products as $product) {
     $product_ids[] = $product->id;
 }
 
-/**
- * Сбор картинок
- */
+// GET IMAGES
+$table_prefix = $modx->getOption('table_prefix');
 $images_result = $modx->query("
 SELECT
     pf.url,
@@ -64,27 +51,26 @@ while ($r = $images_result->fetch(PDO::FETCH_ASSOC)) {
     $id_images[$id][] = $r['url'];
 }
 
-/**
- * Формируем заголовки
- */
-$header_keys =  ['alias', 'parent'];
 
-/**
- * Формируем результаты
- */
+$header_keys =  ['product_alias', 'parent_alias'];
+
+// RESULT
 $value_rows = "";
 foreach ($products as $product) {
-    $value_rows .= $product->alias . ';';
-    $value_rows .= $product->parent . ';';
+    $parent = $modx->getObject('modResource', $product->parent);
+    if ($parent->get('context_key') != $context_key) continue;
 
-    // Картинки
+    $value_rows .= $product->alias . ';';
+    $value_rows .= $parent->alias . ';';
+
+    // images
     $images = $id_images[$product->id];
     foreach ($images as $image_idx => $image) {
         $image_key = "image-$image_idx";
         if (!in_array($image_key, $header_keys)) {
             $header_keys[] = $image_key;
         }
-        $value_rows .= "https://www-knauf.ru/$image" . ';';
+        $value_rows .= "https://$domain_images/$image" . ';';
     }
 
     $value_rows .= PHP_EOL;
@@ -93,9 +79,12 @@ foreach ($products as $product) {
 $header_keys = implode(';', $header_keys) . PHP_EOL;
 $output = $header_keys . $value_rows;
 
-/**
- * Сохраняем результат в файл
- */
-$filename = "IMAGES.csv";
-$full_path = MODX_BASE_PATH . $filename;
+// SAVE
+$folder = MODX_BASE_PATH . "_export-images";
+
+if (!is_dir($folder)) mkdir($folder, 0777, true);
+
+$filename = "$offset.csv";
+$full_path = $folder . '/' . $filename;
+
 file_put_contents($full_path, $output);
