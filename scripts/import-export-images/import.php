@@ -157,7 +157,6 @@ while (($data = fgetcsv($handle, 0, ';')) !== false) {
     }
 
     // освобождаем память
-    $modx->removeCollection('msProductFile', ['product_id' => $product->id]);
     unset($product, $parent);
 }
 
