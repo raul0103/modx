@@ -140,13 +140,20 @@ while (($data = fgetcsv($handle, 0, ';')) !== false) {
         continue;
     }
 
-    $parent = $modx->getObject('modResource', ['alias' => $parent_alias]);
+    $parents = $modx->getCollection('modResource', ['alias' => $parent_alias]);
+    if (!$parents) continue;
+
+    $parent = reset($parents);
     if (!$parent) continue;
 
-    $product = $modx->getObject('modResource', [
-        'parent' => $parent->id,
-        'alias'  => $product_alias
-    ]);
+    foreach ($parents as $parent) {
+        $product = $modx->getObject('modResource', [
+            'parent' => $parent->id,
+            'alias'  => $product_alias
+        ]);
+
+        if ($product) break;
+    }
     if (!$product) continue;
 
     for ($i = 2; $i < count($data); $i++) {
