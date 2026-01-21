@@ -1,106 +1,166 @@
 <?php
 
 /**
- * Импорт изображений в miniShop2 из CSV
+ * Безопасный импорт изображений в miniShop2 из CSV
+ * Оптимизирован по памяти
  */
 
-ini_set("max_execution_time", 0);
+ini_set('max_execution_time', 0);
+ini_set('memory_limit', '1G');
 
 $file_name = '0.csv';
 
-if (!$minishop2 = $modx->getService('minishop2')) return;
-
-$csvFile = MODX_BASE_PATH . "/_import-images/$file_name";
-$logFile = MODX_BASE_PATH . "/_import-images/" . pathinfo($file_name, PATHINFO_FILENAME) . ".log";
-
-// --- Считываем уже обработанные товары из лога ---
-$processed = [];
-if (file_exists($logFile)) {
-    $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        // Линия: product_alias|parent_alias|status
-        [$product_alias, $parent_alias, $status] = explode('|', $line);
-        $processed[trim($product_alias) . '|' . trim($parent_alias)] = true;
-    }
+if (!$minishop2 = $modx->getService('minishop2')) {
+    die('miniShop2 not loaded');
 }
 
-// Функция для загрузки изображения
-function downloadImage($url, $save_path)
+$baseDir = MODX_BASE_PATH . '/_import-images/';
+$csvFile = $baseDir . $file_name;
+$logFile = $baseDir . pathinfo($file_name, PATHINFO_FILENAME) . '.log';
+$tempDir = $baseDir . 'temp_images/';
+
+/* =========================
+   Вспомогательные функции
+   ========================= */
+
+/**
+ * Проверка — есть ли уже такая картинка у товара
+ */
+function productHasImage($modx, $productId, $fileName)
 {
-    $dir = dirname($save_path);
+    return (bool)$modx->getObject('msProductFile', [
+        'product_id' => $productId,
+        'file'       => $fileName
+    ]);
+}
+
+/**
+ * Потоковая загрузка файла (минимум памяти)
+ */
+function downloadImageStream($url, $savePath)
+{
+    $dir = dirname($savePath);
     if (!is_dir($dir)) {
         mkdir($dir, 0777, true);
     }
 
-    $image_data = file_get_contents($url);
-    if ($image_data === false) {
+    $fp = fopen($savePath, 'w');
+    if (!$fp) return false;
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_FILE           => $fp,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 60,
+        CURLOPT_FAILONERROR    => true,
+        CURLOPT_USERAGENT      => 'MODX image importer'
+    ]);
+
+    $result = curl_exec($ch);
+    curl_close($ch);
+    fclose($fp);
+
+    if (!$result) {
+        @unlink($savePath);
         return false;
     }
 
-    file_put_contents($save_path, $image_data);
     return true;
 }
 
-// Функция обработки изображения
-function handlerImage($image_url, $product, $minishop2, $logFile)
+/**
+ * Основной обработчик картинки
+ */
+function handleImage($modx, $minishop2, $product, $imageUrl, $tempDir, $logFile)
 {
-    $temp_images_dir = MODX_BASE_PATH . '/_import-images/temp_images/';
+    $path = parse_url($imageUrl, PHP_URL_PATH);
+    $fileName = basename($path);
 
-    $path_parts = parse_url($image_url, PHP_URL_PATH);
-    $file_name = basename($path_parts);
-    $save_path = $temp_images_dir . $product->id . '/' . $file_name;
+    if (!$fileName) return;
 
-    if (downloadImage($image_url, $save_path)) {
-        $res = $minishop2->runProcessor('mgr/gallery/upload', [
-            'id' => $product->id,
-            'file' => $save_path
-        ]);
-
-        if ($res->isError()) {
-            $status = "ERROR: " . implode('; ', $res->getAllErrors());
-        } else {
-            $status = "OK";
-        }
-    } else {
-        $status = "ERROR: download failed";
+    // Проверяем, есть ли уже такая картинка
+    if (productHasImage($modx, $product->id, $fileName)) {
+        $msg = "{$product->alias}|{$product->parent}|SKIP: exists\n";
+        file_put_contents($logFile, $msg, FILE_APPEND);
+        return;
     }
 
-    // Логируем product_alias | parent_alias | статус
-    $message = $product->alias . '|' . $product->parent . '|' . $status . "\n";
-    file_put_contents($logFile, $message, FILE_APPEND);
+    $tempPath = $tempDir . $product->id . '/' . $fileName;
 
-    echo $message;
+    if (!downloadImageStream($imageUrl, $tempPath)) {
+        $msg = "{$product->alias}|{$product->parent}|ERROR: download\n";
+        file_put_contents($logFile, $msg, FILE_APPEND);
+        return;
+    }
+
+    $res = $minishop2->runProcessor('mgr/gallery/upload', [
+        'id'   => $product->id,
+        'file' => $tempPath
+    ]);
+
+    if ($res->isError()) {
+        $msg = "{$product->alias}|{$product->parent}|ERROR: upload\n";
+    } else {
+        $msg = "{$product->alias}|{$product->parent}|OK\n";
+    }
+
+    file_put_contents($logFile, $msg, FILE_APPEND);
+
+    // Удаляем temp-файл
+    @unlink($tempPath);
 }
 
-// --- Работа с CSV ---
+/* =========================
+   Работа с CSV
+   ========================= */
+
+if (!file_exists($csvFile)) {
+    die("CSV not found");
+}
+
+$processed = [];
+if (file_exists($logFile)) {
+    foreach (file($logFile, FILE_IGNORE_NEW_LINES) as $line) {
+        [$a, $p] = explode('|', $line);
+        $processed[$a . '|' . $p] = true;
+    }
+}
+
 $handle = fopen($csvFile, 'r');
-if ($handle === false) die("Ошибка открытия файла $csvFile");
+if (!$handle) die('CSV open error');
 
-$header = fgetcsv($handle, 1000, ';'); // первая строка - заголовок
+$header = fgetcsv($handle, 0, ';');
 
-while (($data = fgetcsv($handle, 1000, ';')) !== false) {
+while (($data = fgetcsv($handle, 0, ';')) !== false) {
+
     $product_alias = trim($data[0]);
-    $parent_alias = trim($data[1]);
+    $parent_alias  = trim($data[1]);
 
-    // Проверяем, не обработан ли уже этот товар
-    if (isset($processed[$product_alias . '|' . $parent_alias])) continue;
+    if (isset($processed[$product_alias . '|' . $parent_alias])) {
+        continue;
+    }
 
     $parent = $modx->getObject('modResource', ['alias' => $parent_alias]);
     if (!$parent) continue;
 
-    $resource = $modx->getObject('modResource', [
+    $product = $modx->getObject('modResource', [
         'parent' => $parent->id,
-        'alias' => $product_alias,
+        'alias'  => $product_alias
     ]);
-    if (!$resource) continue;
+    if (!$product) continue;
 
-    // Первые 2 индекса это product_alias и parent_alias
     for ($i = 2; $i < count($data); $i++) {
-        $image_url = trim($data[$i]);
-        if (empty($image_url)) continue;
-
-        handlerImage($image_url, $resource, $minishop2, $logFile);
+        $url = trim($data[$i]);
+        if ($url) {
+            handleImage($modx, $minishop2, $product, $url, $tempDir, $logFile);
+        }
     }
+
+    // освобождаем память
+    $modx->removeCollection('msProductFile', ['product_id' => $product->id]);
+    unset($product, $parent);
 }
 
 fclose($handle);
+
+echo "Import finished\n";
