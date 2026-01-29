@@ -145,7 +145,8 @@ if (!class_exists('smResources')) {
       global $modx;
 
       $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND `deleted` = :deleted AND `published` = :published AND template != :template");
-      $stmt->bindValue(':class_key', 'modResource', PDO::PARAM_STR);
+
+      $stmt->bindValue(':class_key', 'modDocument', PDO::PARAM_STR);
       $stmt->bindValue(':template', 0, PDO::PARAM_INT);
       $stmt->bindValue(':deleted', 0, PDO::PARAM_INT);
       $stmt->bindValue(':published', 1, PDO::PARAM_INT);
@@ -260,8 +261,12 @@ if ($CURRENT_SITEMAP_KEY === 'resources') {
   // Формируем вывод
   foreach ($resources as $resource) {
     $randomDate = smRandomDate($resource['id']);
+
+    $uri = $resource['uri'];
+    if ($uri === 'index/')  $uri = "";
+
     $output .= "<url>
-                  <loc>https://{$_SERVER['HTTP_HOST']}/{$resource['uri']}</loc>
+                  <loc>https://{$_SERVER['HTTP_HOST']}/{$uri}</loc>
                   <lastmod>$randomDate</lastmod>
                   <changefreq>weekly</changefreq>
                   <priority>0.25</priority>
