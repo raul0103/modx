@@ -92,28 +92,35 @@ if (!function_exists('smRandomDate')) {
    * @param mixed $coefficient - По какому коэффициенту подбираем рандомноую дату, например по ID ресурса или индекс массива
    * @return string
    */
-  function smRandomDate($coefficient = 1)
+  function smRandomDate(int $coefficient = 1)
   {
-    // Рандомный выбор количества дней
-    $daysToSubtract = ($coefficient % 2 === 0) ? 2 : 3;
+    $tz = new DateTimeZone('UTC');
+    $now = new DateTime('now', $tz);
 
-    // Базовая дата
-    $date = new DateTime('now', new DateTimeZone('UTC'));
+    // 1. Неделя месяца
+    $dayOfMonth = (int)$now->format('j');
+    $firstDayOfMonth = new DateTime($now->format('Y-m-01'), $tz);
+    $firstWeekday = (int)$firstDayOfMonth->format('N');
+    $weekOfMonth = (int)ceil(($dayOfMonth + $firstWeekday - 1) / 7);
+
+    // 2. Seed (детерминированный)
+    $seedSource = $now->format('Y-m') . '-' . $weekOfMonth . '-' . $coefficient;
+    mt_srand(crc32($seedSource));
+
+    // 3. Смещение от 1 до 6 дней
+    $daysToSubtract = mt_rand(1, 6);
+
+    // 4. Формируем дату
+    $date = new DateTime('now', $tz);
     $date->modify("-{$daysToSubtract} days");
 
-    // Делаем seed, зависящий от даты и daysToSubtract
-    $seed = crc32($date->format('Y-m-d') . $coefficient);
-    mt_srand($seed);
+    // 5. Рандомное время
+    $date->setTime(
+      mt_rand(0, 23),
+      mt_rand(0, 59),
+      mt_rand(0, 59)
+    );
 
-    // Рандомное время
-    $hour   = mt_rand(0, 23);
-    $minute = mt_rand(0, 59);
-    $second = mt_rand(0, 59);
-
-    // Устанавливаем время
-    $date->setTime($hour, $minute, $second);
-
-    // Результат
     return $date->format('Y-m-d\TH:i:s+00:00');
   }
 }
