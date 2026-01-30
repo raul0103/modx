@@ -32,8 +32,13 @@ if (!class_exists('smProducts')) {
     public static function getCount()
     {
       global $modx;
-      $result = $modx->query("SELECT count(id) as count FROM modx_site_content WHERE class_key = 'msProduct'");
-      return (int)$result->fetch(PDO::FETCH_COLUMN);
+      $stmt = $modx->prepare("SELECT count(id) as count FROM modx_site_content WHERE class_key = :class_key AND context_key = :context_key");
+
+      $stmt->bindValue(':context_key', $modx->context->key, PDO::PARAM_STR);
+      $stmt->bindValue(':class_key', 'msProduct', PDO::PARAM_STR);
+      $stmt->execute();
+
+      return (int)$stmt->fetch(PDO::FETCH_COLUMN);
     }
 
     /**
@@ -43,8 +48,9 @@ if (!class_exists('smProducts')) {
     public static function getAll()
     {
       global $modx;
-      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND `deleted` = :deleted AND `published` = :published");
+      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND context_key = :context_key AND `deleted` = :deleted AND `published` = :published");
 
+      $stmt->bindValue(':context_key', $modx->context->key, PDO::PARAM_STR);
       $stmt->bindValue(':class_key', 'msProduct', PDO::PARAM_STR);
       $stmt->bindValue(':deleted', 0, PDO::PARAM_INT);
       $stmt->bindValue(':published', 1, PDO::PARAM_INT);
@@ -63,8 +69,9 @@ if (!class_exists('smProducts')) {
     {
       global $modx;
 
-      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND `deleted` = :deleted AND `published` = :published LIMIT :limit OFFSET :offset");
+      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND context_key = :context_key AND `deleted` = :deleted AND `published` = :published LIMIT :limit OFFSET :offset");
 
+      $stmt->bindValue(':context_key', $modx->context->key, PDO::PARAM_STR);
       $stmt->bindValue(':class_key', 'msProduct', PDO::PARAM_STR);
       $stmt->bindValue(':deleted', 0);
       $stmt->bindValue(':published', 1);
@@ -122,7 +129,9 @@ if (!class_exists('smCategories')) {
     {
       global $modx;
 
-      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND `deleted` = :deleted AND `published` = :published");
+      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND context_key = :context_key AND `deleted` = :deleted AND `published` = :published");
+
+      $stmt->bindValue(':context_key', $modx->context->key, PDO::PARAM_STR);
       $stmt->bindValue(':class_key', 'msCategory', PDO::PARAM_STR);
       $stmt->bindValue(':deleted', 0, PDO::PARAM_INT);
       $stmt->bindValue(':published', 1, PDO::PARAM_INT);
@@ -144,8 +153,9 @@ if (!class_exists('smResources')) {
     {
       global $modx;
 
-      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND `deleted` = :deleted AND `published` = :published AND template != :template");
+      $stmt = $modx->prepare("SELECT id, uri FROM modx_site_content WHERE class_key = :class_key AND context_key = :context_key AND `deleted` = :deleted AND `published` = :published AND template != :template");
 
+      $stmt->bindValue(':context_key', $modx->context->key, PDO::PARAM_STR);
       $stmt->bindValue(':class_key', 'modDocument', PDO::PARAM_STR);
       $stmt->bindValue(':template', 0, PDO::PARAM_INT);
       $stmt->bindValue(':deleted', 0, PDO::PARAM_INT);
