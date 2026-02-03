@@ -183,7 +183,7 @@ if ($extension !== 'xml') return;
 
 // Определяем по URL тип текущего сайтмапа
 $CURRENT_SITEMAP_KEY = null;
-foreach ($SITEMAP_LINKS as $sitemap_key => $sitemap_link) {
+foreach (SITEMAP_LINKS as $sitemap_key => $sitemap_link) {
   if (strpos($url_path, $sitemap_link) !== false) {
     $CURRENT_SITEMAP_KEY = $sitemap_key;
     break;
@@ -199,15 +199,15 @@ header('Content-Type: application/xml; charset=UTF-8');
 
 if ($CURRENT_SITEMAP_KEY === 'base') {
   // Формируем ссылки
-  $output_links = $SITEMAP_LINKS;
+  $output_links = SITEMAP_LINKS;
 
   // Если товаров больше лимита - Создаем ссылки с пагинацией на товары
   $products_count = smProducts::getCount();
-  if ($products_count > $PRODUCT_LIMIT) {
+  if ($products_count > PRODUCT_LIMIT) {
     unset($output_links['products']);
-    $pages = $products_count / $PRODUCT_LIMIT;
+    $pages = $products_count / PRODUCT_LIMIT;
     foreach (range(1, $pages + 1) as $page) {
-      $output_links["products-$page"] = "$page/" . $SITEMAP_LINKS['products'];
+      $output_links["products-$page"] = "$page/" . SITEMAP_LINKS['products'];
     }
   }
   $output_links = array_values($output_links);
@@ -232,16 +232,16 @@ if ($CURRENT_SITEMAP_KEY === 'base') {
 if ($CURRENT_SITEMAP_KEY === 'products') {
   $products_count = smProducts::getCount();
 
-  if ($products_count > $PRODUCT_LIMIT) {
+  if ($products_count > PRODUCT_LIMIT) {
     // Получили offset
     $parts = array_filter(explode('/', $url_path));
     $offset = array_values($parts)[0]; // После array_filter могут сбиться индексы и offset станет не нулевым, поэтому сброс индексов через array_values
 
     if (!is_numeric($offset)) return;
 
-    $offset = ($offset - 1) * $PRODUCT_LIMIT;
+    $offset = ($offset - 1) * PRODUCT_LIMIT;
 
-    $products = smProducts::getByOffset($PRODUCT_LIMIT, $offset);
+    $products = smProducts::getByOffset(PRODUCT_LIMIT, $offset);
   } else {
     $products = smProducts::getAll();
   }
