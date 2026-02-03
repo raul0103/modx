@@ -1,16 +1,15 @@
 <?php
-
 /**
  * Плагин разбивает sitemap на несколько частей по class_key
  * Установить событие - OnLoadWebDocument
  */
 
-header('Content-Type: application/xml; charset=UTF-8');
-
 $extension = pathinfo($_SERVER['REQUEST_URI'])['extension'];
 $url_path = parse_url($_SERVER['REQUEST_URI'])['path'];
 
 if ($extension !== 'xml') return;
+
+header('Content-Type: application/xml; charset=UTF-8');
 
 $PRODUCT_LIMIT = 5000; // Лимит товаров для создания пагинации
 
