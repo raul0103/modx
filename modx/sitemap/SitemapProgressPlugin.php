@@ -1,25 +1,25 @@
 <?php
-/**
- * Плагин разбивает sitemap на несколько частей по class_key
- * Установить событие - OnLoadWebDocument
- */
 
-$extension = pathinfo($_SERVER['REQUEST_URI'])['extension'];
-$url_path = parse_url($_SERVER['REQUEST_URI'])['path'];
+// SitemapProgressPlugin
+// Плагин разбивает sitemap на несколько частей по class_key
+// Установить событие - OnLoadWebDocument
 
-if ($extension !== 'xml') return;
+// -------------------------------------------------
+// Конфигурация
+// -------------------------------------------------
 
-header('Content-Type: application/xml; charset=UTF-8');
-
-$PRODUCT_LIMIT = 5000; // Лимит товаров для создания пагинации
-
+const PRODUCT_LIMIT = 5000; // Лимит товаров для создания пагинации
 // Адреса на сайтмапы
-$SITEMAP_LINKS = [
+const SITEMAP_LINKS = [
   'products' => 'products/sitemap.xml', // Ресурсы class_key = msProducts
   'categories' => 'categories/sitemap.xml', // Ресурсы class_key = msCategories
   'resources' => 'resources/sitemap.xml', // Ресурсы class_key = modResource
   'base' => 'sitemap.xml', // Основной. Проверяем в последнюю очередь так как вхождение есть в любой из ссылок
 ];
+
+// -------------------------------------------------
+// Необходимые функции и классы
+// -------------------------------------------------
 
 if (!class_exists('smProducts')) {
   class smProducts
@@ -173,6 +173,14 @@ if (!class_exists('smResources')) {
   }
 }
 
+// -------------------------------------------------
+// Опеределяем нужный сайтмап
+// -------------------------------------------------
+$extension = pathinfo($_SERVER['REQUEST_URI'])['extension'];
+$url_path = parse_url($_SERVER['REQUEST_URI'])['path'];
+
+if ($extension !== 'xml') return;
+
 // Определяем по URL тип текущего сайтмапа
 $CURRENT_SITEMAP_KEY = null;
 foreach ($SITEMAP_LINKS as $sitemap_key => $sitemap_link) {
@@ -183,9 +191,12 @@ foreach ($SITEMAP_LINKS as $sitemap_key => $sitemap_link) {
 }
 if (!$CURRENT_SITEMAP_KEY) return;
 
-/**
- * 1. Логика основного sitemap
- */
+header('Content-Type: application/xml; charset=UTF-8');
+
+// -------------------------------------------------
+// 1. Логика основного sitemap
+// -------------------------------------------------
+
 if ($CURRENT_SITEMAP_KEY === 'base') {
   // Формируем ссылки
   $output_links = $SITEMAP_LINKS;
@@ -214,9 +225,10 @@ if ($CURRENT_SITEMAP_KEY === 'base') {
   exit("<sitemapindex xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</sitemapindex>");
 }
 
-/**
- * 2. Логика sitemap на товары
- */
+// -------------------------------------------------
+// 2. Логика sitemap на товары
+// -------------------------------------------------
+
 if ($CURRENT_SITEMAP_KEY === 'products') {
   $products_count = smProducts::getCount();
 
@@ -248,9 +260,10 @@ if ($CURRENT_SITEMAP_KEY === 'products') {
   exit("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
 }
 
-/**
- * 3. Логика sitemap на категории
- */
+// -------------------------------------------------
+// 3. Логика sitemap на категории
+// -------------------------------------------------
+
 if ($CURRENT_SITEMAP_KEY === 'categories') {
   $categories = smCategories::getAll();
 
@@ -268,9 +281,10 @@ if ($CURRENT_SITEMAP_KEY === 'categories') {
   exit("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
 }
 
-/**
- * 4. Логика sitemap на обычные ресурсы
- */
+// -------------------------------------------------
+// 4. Логика sitemap на обычные ресурсы
+// -------------------------------------------------
+
 if ($CURRENT_SITEMAP_KEY === 'resources') {
   $resources = smResources::getAll();
 
