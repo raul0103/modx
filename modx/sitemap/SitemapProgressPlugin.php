@@ -85,45 +85,6 @@ if (!class_exists('smProducts')) {
   }
 }
 
-if (!function_exists('smRandomDate')) {
-  /**
-   * Summary of smRandomDate
-   * @param mixed $coefficient - По какому коэффициенту подбираем рандомноую дату, например по ID ресурса или индекс массива
-   * @return string
-   */
-  function smRandomDate(int $coefficient = 1)
-  {
-    $tz = new DateTimeZone('UTC');
-    $now = new DateTime('now', $tz);
-
-    // 1. Неделя месяца
-    $dayOfMonth = (int)$now->format('j');
-    $firstDayOfMonth = new DateTime($now->format('Y-m-01'), $tz);
-    $firstWeekday = (int)$firstDayOfMonth->format('N');
-    $weekOfMonth = (int)ceil(($dayOfMonth + $firstWeekday - 1) / 7);
-
-    // 2. Seed (детерминированный)
-    $seedSource = $now->format('Y-m') . '-' . $weekOfMonth . '-' . $coefficient;
-    mt_srand(crc32($seedSource));
-
-    // 3. Смещение от 1 до 6 дней
-    $daysToSubtract = mt_rand(1, 6);
-
-    // 4. Формируем дату
-    $date = new DateTime('now', $tz);
-    $date->modify("-{$daysToSubtract} days");
-
-    // 5. Рандомное время
-    $date->setTime(
-      mt_rand(0, 23),
-      mt_rand(0, 59),
-      mt_rand(0, 59)
-    );
-
-    return $date->format('Y-m-d\TH:i:s+00:00');
-  }
-}
-
 if (!class_exists('smCategories')) {
   class smCategories
   {
@@ -173,6 +134,60 @@ if (!class_exists('smResources')) {
   }
 }
 
+if (!function_exists('smRandomDate')) {
+  /**
+   * Summary of smRandomDate
+   * @param mixed $coefficient - По какому коэффициенту подбираем рандомноую дату, например по ID ресурса или индекс массива
+   * @return string
+   */
+  function smRandomDate(int $coefficient = 1)
+  {
+    $tz = new DateTimeZone('UTC');
+    $now = new DateTime('now', $tz);
+
+    // 1. Неделя месяца
+    $dayOfMonth = (int)$now->format('j');
+    $firstDayOfMonth = new DateTime($now->format('Y-m-01'), $tz);
+    $firstWeekday = (int)$firstDayOfMonth->format('N');
+    $weekOfMonth = (int)ceil(($dayOfMonth + $firstWeekday - 1) / 7);
+
+    // 2. Seed (детерминированный)
+    $seedSource = $now->format('Y-m') . '-' . $weekOfMonth . '-' . $coefficient;
+    mt_srand(crc32($seedSource));
+
+    // 3. Смещение от 1 до 6 дней
+    $daysToSubtract = mt_rand(1, 6);
+
+    // 4. Формируем дату
+    $date = new DateTime('now', $tz);
+    $date->modify("-{$daysToSubtract} days");
+
+    // 5. Рандомное время
+    $date->setTime(
+      mt_rand(0, 23),
+      mt_rand(0, 59),
+      mt_rand(0, 59)
+    );
+
+    return $date->format('Y-m-d\TH:i:s+00:00');
+  }
+}
+
+if (!function_exists('smPageOutput')) {
+  /**
+   * Отдает данные на страницу
+   */
+  function smPageOutput($content)
+  {
+    header('HTTP/1.1 200 OK');
+    header('Content-Type: application/xml; charset=UTF-8');
+
+    exit($content);
+  }
+}
+
+
+
 // -------------------------------------------------
 // Опеределяем нужный сайтмап
 // -------------------------------------------------
@@ -191,7 +206,6 @@ foreach (SITEMAP_LINKS as $sitemap_key => $sitemap_link) {
 }
 if (!$CURRENT_SITEMAP_KEY) return;
 
-header('Content-Type: application/xml; charset=UTF-8');
 
 // -------------------------------------------------
 // 1. Логика основного sitemap
@@ -222,7 +236,7 @@ if ($CURRENT_SITEMAP_KEY === 'base') {
                 </sitemap>";
   }
 
-  exit("<sitemapindex xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</sitemapindex>");
+  smPageOutput("<sitemapindex xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</sitemapindex>");
 }
 
 // -------------------------------------------------
@@ -257,7 +271,7 @@ if ($CURRENT_SITEMAP_KEY === 'products') {
                 </url>";
   }
 
-  exit("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
+  smPageOutput("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
 }
 
 // -------------------------------------------------
@@ -278,7 +292,7 @@ if ($CURRENT_SITEMAP_KEY === 'categories') {
                 </url>";
   }
 
-  exit("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
+  smPageOutput("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
 }
 
 // -------------------------------------------------
@@ -303,5 +317,5 @@ if ($CURRENT_SITEMAP_KEY === 'resources') {
                 </url>";
   }
 
-  exit("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
+  smPageOutput("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>$output</urlset>");
 }
